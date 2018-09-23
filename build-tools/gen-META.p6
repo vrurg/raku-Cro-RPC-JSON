@@ -21,7 +21,7 @@ my $m = META6.new(
     tags           => <Cro JSON-RPC>,
     authors        => ['Vadim Belman <vrurg@cpan.org>'],
     auth           => 'github:vrurg',
-    source-url     => 'https://github.com/vrurg/Perl6-Cro-RPC-JSON',
+    source-url     => 'git://github.com/vrurg/Perl6-Cro-RPC-JSON.git',
     support        => META6::Support.new(
         source          => 'https://github.com/vrurg/Perl6-Cro-RPC-JSON.git',
     ),
