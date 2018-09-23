@@ -1,16 +1,24 @@
 {
-  "resources": [
-    
-  ],
-  "auth": "github:vrurg",
   "name": "Cro::RPC::JSON",
-  "license": "Artistic-2.0",
+  "support": {
+    "source": "https://github.com/vrurg/Perl6-Cro-RPC-JSON.git"
+  },
+  "source-url": "git://github.com/vrurg/Perl6-Cro-RPC-JSON.git",
   "test-depends": [
     "Test",
     "Test::META",
     "Test::When",
     "Cro::HTTP::Test"
   ],
+  "provides": {
+    "Cro::RPC::JSON": "lib/Cro/RPC/JSON.pm6",
+    "Cro::RPC::JSON::RequestParser": "lib/Cro/RPC/JSON/RequestParser.pm6",
+    "Cro::RPC::JSON::Message": "lib/Cro/RPC/JSON/Message.pm6",
+    "Cro::RPC::JSON::ResponseSerializer": "lib/Cro/RPC/JSON/ResponseSerializer.pm6",
+    "Cro::RPC::JSON::Handler": "lib/Cro/RPC/JSON/Handler.pm6",
+    "Cro::RPC::JSON::Exception": "lib/Cro/RPC/JSON/Exception.pm6"
+  },
+  "production": true,
   "build-depends": [
     "META6",
     "p6doc",
@@ -21,31 +29,23 @@
     "Cro::Transform",
     "Cro::Message"
   ],
-  "support": {
-    "source": "https://github.com/vrurg/Perl6-Cro-RPC-JSON.git"
-  },
-  "description": "Cro JSON-RPC implementation",
-  "source-url": "https://github.com/vrurg/Perl6-Cro-RPC-JSON",
-  "meta-version": "0",
-  "version": "0.0.1",
-  "perl": "6.*",
   "depends": [
     
-  ],
-  "provides": {
-    "Cro::RPC::JSON::Exception": "lib/Cro/RPC/JSON/Exception.pm6",
-    "Cro::RPC::JSON::ResponseSerializer": "lib/Cro/RPC/JSON/ResponseSerializer.pm6",
-    "Cro::RPC::JSON::Handler": "lib/Cro/RPC/JSON/Handler.pm6",
-    "Cro::RPC::JSON::RequestParser": "lib/Cro/RPC/JSON/RequestParser.pm6",
-    "Cro::RPC::JSON::Message": "lib/Cro/RPC/JSON/Message.pm6",
-    "Cro::RPC::JSON": "lib/Cro/RPC/JSON.pm6"
-  },
-  "production": true,
-  "authors": [
-    "Vadim Belman <vrurg@cpan.org>"
   ],
   "tags": [
     "Cro",
     "JSON-RPC"
-  ]
+  ],
+  "auth": "github:vrurg",
+  "authors": [
+    "Vadim Belman <vrurg@cpan.org>"
+  ],
+  "meta-version": "0",
+  "perl": "6.*",
+  "license": "Artistic-2.0",
+  "description": "Cro JSON-RPC implementation",
+  "resources": [
+    
+  ],
+  "version": "0.0.1"
 }
