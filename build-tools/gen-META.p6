@@ -34,7 +34,7 @@ my $m = META6.new(
         'Cro::RPC::JSON::ResponseSerializer' => 'lib/Cro/RPC/JSON/ResponseSerializer.pm6',
     },
     license        => 'Artistic-2.0',
-    production     => False,
+    production     => True,
 );
 
 print $m.to-json;
