@@ -6,7 +6,7 @@ package Cro::RPC::JSON {
     use Cro::RPC::JSON::Handler;
     use Cro::RPC::JSON::Exception;
 
-    module VER:ver<0.0.1>:auth<cpan:VRURG> {}
+    module VER:ver<0.0.2>:auth<cpan:VRURG> {}
 
     proto json-rpc (|) is export { * }
 

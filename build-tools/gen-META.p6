@@ -9,15 +9,15 @@ my $m = META6.new(
     description    => 'Cro JSON-RPC implementation',
     version        => Cro::RPC::JSON::VER.^ver,
     perl-version   => Version.new('6.*'),
-    #depends        => <JSON::Class>,
-    test-depends   => <Test Test::META Test::When Cro::HTTP::Test>,
-    build-depends  => <
-        META6 p6doc Pod::To::Markdown JSON::Fast
+    depends        => <
         Cro::HTTP::Router
         Cro::HTTP::Request
         Cro::Transform
         Cro::Message
+        JSON::Fast
     >,
+    test-depends   => <Test Test::META Test::When Cro::HTTP::Test>,
+    build-depends  => <META6 p6doc Pod::To::Markdown>,
     tags           => <Cro JSON-RPC>,
     authors        => ['Vadim Belman <vrurg@cpan.org>'],
     auth           => 'github:vrurg',

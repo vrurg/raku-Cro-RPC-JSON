@@ -1,14 +1,3 @@
-### sub json-rpc-find-method
-
-```perl6
-sub json-rpc-find-method(
-    $obj,
-    Str $method
-) returns Method
-```
-
-Method looks up for a JSON-RPC method name C<$method> on object's hierarchy including roles.
-
 NAME
 ====
 
