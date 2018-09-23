@@ -169,7 +169,7 @@ multi trait_mod:<is>( Method:D $m, Str :$json-rpc ) is export {
     apply-trait( $json-rpc, $m );
 }
 
-#| Method looks up for a JSON-RPC method name C<$method> on object's hierarchy including roles.
+# Method looks up for a JSON-RPC method name C<$method> on object's hierarchy including roles.
 sub json-rpc-find-method( $obj, Str $method --> Method) is export {
     #note "* MRO:", $obj.^mro;
     for $obj.^mro.grep( { .HOW ~~ Cro::RPC::JSON::ClassHOW } ) -> $class {
