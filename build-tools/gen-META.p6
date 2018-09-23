@@ -11,16 +11,27 @@ my $m = META6.new(
     perl-version   => Version.new('6.*'),
     #depends        => <JSON::Class>,
     test-depends   => <Test Test::META Test::When Cro::HTTP::Test>,
-    build-depends  => <META6 p6doc Pod::To::Markdown>,
+    build-depends  => <
+        META6 p6doc Pod::To::Markdown JSON::Fast
+        Cro::HTTP::Router
+        Cro::HTTP::Request
+        Cro::Transform
+        Cro::Message
+    >,
     tags           => <Cro JSON-RPC>,
     authors        => ['Vadim Belman <vrurg@cpan.org>'],
     auth           => 'github:vrurg',
-    #source-url     => 'git://github.com/vrurg/Perl6-AttrX-Mooish.git',
-    #support        => META6::Support.new(
-    #    source          => 'git://github.com/vrurg/Perl6-AttrX-Mooish.git',
-    #),
+    source-url     => 'https://github.com/vrurg/Perl6-Cro-RPC-JSON',
+    support        => META6::Support.new(
+        source          => 'https://github.com/vrurg/Perl6-Cro-RPC-JSON.git',
+    ),
     provides => {
-        'Cro::RPC::JSON' => 'lib/Cro/RPC/JSON',
+        'Cro::RPC::JSON' => 'lib/Cro/RPC/JSON.pm6',
+        'Cro::RPC::JSON::Exception' => 'lib/Cro/RPC/JSON/Exception.pm6',
+        'Cro::RPC::JSON::Handler' => 'lib/Cro/RPC/JSON/Handler.pm6',
+        'Cro::RPC::JSON::Message' => 'lib/Cro/RPC/JSON/Message.pm6',
+        'Cro::RPC::JSON::RequestParser' => 'lib/Cro/RPC/JSON/RequestParser.pm6',
+        'Cro::RPC::JSON::ResponseSerializer' => 'lib/Cro/RPC/JSON/ResponseSerializer.pm6',
     },
     license        => 'Artistic-2.0',
     production     => False,
