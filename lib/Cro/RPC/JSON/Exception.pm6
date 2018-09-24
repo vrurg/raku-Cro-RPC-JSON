@@ -53,3 +53,6 @@ class X::Cro::RPC::JSON::MediaType is Exception does X::Cro::RPC::JSON {
     method jrpc-code { -32700 }
     method http-code { 415 }
 }
+
+# Copyright (c) 2018, Vadim Belman <vrurg@cpan.org>
+

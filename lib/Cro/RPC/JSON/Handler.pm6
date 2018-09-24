@@ -69,3 +69,6 @@ class Cro::RPC::JSON::Handler does Cro::Transform is export {
         return $response;
     }
 }
+
+# Copyright (c) 2018, Vadim Belman <vrurg@cpan.org>
+

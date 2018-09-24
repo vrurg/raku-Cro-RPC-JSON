@@ -1,6 +1,8 @@
 use Test;
 use Cro::RPC::JSON::Message;
 
+plan 2;
+
 my @errParams = 
     %(
         :code(-32600),
@@ -41,4 +43,5 @@ subtest "Response object" => {
 }
 
 done-testing;
+
 # vim: ft=perl6
