@@ -69,14 +69,18 @@ package Cro::RPC::JSON {
 
             # Only use jrpc request object as a parameter if method accepts it. Multi-methods will never receive the
             # object, only the parameters.
-            if $method.candidates[0].multi or !$signature.ACCEPTS( $req ) {
+            if $method.candidates[0].multi or (
+                $signature.arity != 2 # 2 because method's arity includes self
+                    or $signature.count != 2
+                    or $signature.params[1].type !~~ Cro::RPC::JSON::Request 
+            ) {
                 $params = $req.params;
             }
             else {
                 $params = [ $req ];
             }
 
-            #note "METHOD $method PARAMS: ", $params;
+            #note "METHOD {$method.name} PARAMS: ", $params;
 
             do {
                 CATCH {
