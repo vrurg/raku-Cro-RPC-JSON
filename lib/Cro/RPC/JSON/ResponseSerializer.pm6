@@ -34,3 +34,6 @@ class Cro::RPC::JSON::ResponseSerializer does Cro::Transform is export {
         }
     }
 }
+
+# Copyright (c) 2018, Vadim Belman <vrurg@cpan.org>
+

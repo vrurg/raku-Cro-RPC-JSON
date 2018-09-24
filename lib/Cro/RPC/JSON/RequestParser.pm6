@@ -55,3 +55,6 @@ class Cro::RPC::JSON::RequestParser does Cro::Transform is export {
         }
     }
 }
+
+# Copyright (c) 2018, Vadim Belman <vrurg@cpan.org>
+
