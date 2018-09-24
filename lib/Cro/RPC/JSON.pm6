@@ -10,8 +10,8 @@ package Cro::RPC::JSON {
 
     proto json-rpc (|) is export { * }
 
-    multi json-rpc ( &block ) {
-        #note "Creating pipeline with handler ", &block;
+    multi json-rpc ( Code $block ) {
+        #note "Creating pipeline with handler ", $block;
 
         my $request = request;
         my $response = response;
@@ -21,7 +21,7 @@ package Cro::RPC::JSON {
         my Cro::Transform $pipeline = Cro.compose(
             label => "JSON-RPC Handler",
             Cro::RPC::JSON::RequestParser.new,
-            Cro::RPC::JSON::Handler.new(&block),
+            Cro::RPC::JSON::Handler.new($block),
             Cro::RPC::JSON::ResponseSerializer.new,
         );
         #note "GEN RESPONSE";
