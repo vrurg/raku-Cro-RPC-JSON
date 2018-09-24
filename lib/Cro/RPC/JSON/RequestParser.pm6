@@ -13,6 +13,10 @@ class Cro::RPC::JSON::RequestParser does Cro::Transform is export {
         supply {
             #note "supply?";
             whenever $in -> $request {
+                unless $request.method.fc ~~ 'post'.fc {
+                    # Must produce HTTP 500
+                    die "JSON-RPC is only supported for POST method";
+                }
                 my $content-type = $request.content-type;
                 #note "REQUEST CONTENT TYPE: ", $content-type;
                 #note "PARAMETER: ", $_ for $content-type.parameters;

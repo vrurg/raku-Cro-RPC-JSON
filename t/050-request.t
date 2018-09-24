@@ -59,6 +59,11 @@ subtest "Basics", {
                 },
             ],
             ;
+        test get( '/api' ),
+                status => 500,
+                content-type => "text/plain",
+                body-text => /"500 JSON-RPC is only supported for POST method"/,
+                ;
     }
 }
 

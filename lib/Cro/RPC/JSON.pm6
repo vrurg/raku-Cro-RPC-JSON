@@ -10,8 +10,8 @@ package Cro::RPC::JSON {
 
     proto json-rpc (|) is export { * }
 
-    multi json-rpc ( &handler ) {
-        #note "Creating pipeline with handler ", &handler;
+    multi json-rpc ( &block ) {
+        #note "Creating pipeline with handler ", &block;
 
         my $request = request;
         my $response = response;
@@ -21,19 +21,20 @@ package Cro::RPC::JSON {
         my Cro::Transform $pipeline = Cro.compose(
             label => "JSON-RPC Handler",
             Cro::RPC::JSON::RequestParser.new,
-            Cro::RPC::JSON::Handler.new(&handler),
+            Cro::RPC::JSON::Handler.new(&block),
             Cro::RPC::JSON::ResponseSerializer.new,
         );
         #note "GEN RESPONSE";
         CATCH {
-            #note "PROCESSING EXCEPTION ", $_.WHO;
+            #note "PROCESSING EXCEPTION ", $_.WHO, " ", ~$_, $_.backtrace;
             when X::Cro::RPC::JSON {
                 #note "STATUS CODE FROM EXCEPTION: ", $_.http-code;
                 $response.status = $_.http-code;
             }
             default { 
                 #note "CAUGHT EXCEPTION: ", $_.WHO;
-                $_.rethrow 
+                response.status = 500;
+                content 'text/plain', '500 ' ~ $_;
             }
         };
         react {
