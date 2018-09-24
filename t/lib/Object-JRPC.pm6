@@ -7,6 +7,10 @@ class JRPC-Actor is export {
         return "$b and $a";
     }
 
+    method by-request ( Cro::RPC::JSON::Request $req ) is json-rpc {
+        { param-count => $req.params.elems }
+    }
+
     proto method bar (|) is json-rpc { * }
 
     multi method bar ( Str :$a! ) { "single named Str param" }

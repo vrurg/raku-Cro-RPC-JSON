@@ -70,76 +70,98 @@ subtest "Basics", {
 }
 
 subtest "Actor Class" => {
-    plan 8;
+    plan 9;
     use Object-JRPC;
 
+    my $id = 123;
     test-service routes, {
-        test post('api', json => { jsonrpc=>"2.0", id=>123, method => "foo", params => { a => 2, b => "two" } }),
+        test post('api', json => { jsonrpc=>"2.0", id => $id, method => "foo", params => { a => 2, b => "two" } }),
             status => 200,
-            json => {jsonrpc => "2.0", id => 123, result => "two and 2"};
+            json => {jsonrpc => "2.0", id => $id, result => "two and 2"};
 
-        test post( 'api', json => { jsonrpc=>"2.0", id=>123, method => "bar", params => { a => "A!" } } ),
-            status => 200,
-            json => {jsonrpc => "2.0", id => 123, result => "single named Str param"};
+        $id++;
 
-        test post( 'api', json => { jsonrpc=>"2.0", id=>123, method => "bar", params => [ 1, pi, "whatever" ] } ),
+        test post('api', json => { jsonrpc=>"2.0", id => $id, method => "by-request", params => { a => 2, b => "two" } }),
             status => 200,
-            json => {jsonrpc => "2.0", id => 123, result => "Int, Num, Str positionals"};
+            json => {jsonrpc => "2.0", id => $id, result => { param-count => 2 } };
+
+        $id++;
+
+        test post( 'api', json => { jsonrpc=>"2.0", id => $id, method => "bar", params => { a => "A!" } } ),
+            status => 200,
+            json => {jsonrpc => "2.0", id => $id, result => "single named Str param"};
+
+
+        $id++;
+
+        test post( 'api', json => { jsonrpc=>"2.0", id => $id, method => "bar", params => [ 1, pi, "whatever" ] } ),
+            status => 200,
+            json => {jsonrpc => "2.0", id => $id, result => "Int, Num, Str positionals"};
+
+        $id++;
 
         test post( 
                 'api', 
                 json => {
-                    jsonrpc=>"2.0",
-                    id=>123, 
-                    method => "bar", 
-                    params => { :t("Їхав до бабусі один сірий гусик"), :p("π"), :e(e) } 
+                    jsonrpc => "2.0",
+                    id      => $id, 
+                    method  => "bar", 
+                    params  => { :t("Їхав до бабусі один сірий гусик"), :p("π"), :e(e) } 
                 },
                 content-type => "application/json; charset=UTF-8",
             ),
             status => 200,
             json => {
                 jsonrpc => "2.0",
-                id => 123,
-                result => [ 
+                id      => $id,
+                result  => [ 
                     "slurpy hash:", 
                     { :t("Їхав до бабусі один сірий гусик"), :p("π"), :e(e) }
                 ],
             };
 
-        test post('api', json => { jsonrpc=>"2.0", id=>123, method => "non-json" }),
+        $id++;
+
+        test post('api', json => { jsonrpc=>"2.0", id => $id, method => "non-json" }),
             status => 200,
-            json => {
+            json   => {
                 jsonrpc => "2.0",
-                id => 123,
-                error => {
-                    code => JRPCMethodNotFound,
+                id      => $id,
+                error   => {
+                    code    => JRPCMethodNotFound,
                     message => "Method JRPC-Actor::non-json: doesn't have 'is json-rpc' trait",
-                    data => { method => "non-json" },
+                    data    => { method => "non-json" },
                 }
             };
+
+        $id++;
  
-        test post('api', json => { jsonrpc=>"2.0", id=>123, method => "no-method" }),
+        test post('api', json => { jsonrpc=>"2.0", id => $id, method => "no-method" }),
             status => 200,
-            json => {
+            json   => {
                 jsonrpc => "2.0",
-                id => 123,
-                error => {
-                    code => JRPCMethodNotFound,
+                id      => $id,
+                error   => {
+                    code    => JRPCMethodNotFound,
                     message => "Method JRPC-Actor::no-method: doesn't exists",
-                    data => { method => "no-method" },
+                    data    => { method => "no-method" },
                 }
             };
 
-        test post('api', json => { jsonrpc=>"2.0", id=>123, method => "fail", params => { a => 2, b => "two" } }),
-            status => 200,
-            json => {jsonrpc => "2.0", id => 123, error => { code => JRPCInvalidParams, message => "I always fail" }};
+        $id++;
 
-        test post('api', json => { jsonrpc=>"2.0", id=>123, method => "mortal", params => { a => 2, b => "two" } }),
+        test post('api', json => { jsonrpc=>"2.0", id => $id, method => "fail", params => { a => 2, b => "two" } }),
             status => 200,
-            json => {
+            json => {jsonrpc => "2.0", id => $id, error => { code => JRPCInvalidParams, message => "I always fail" }};
+
+        $id++;
+
+        test post('api', json => { jsonrpc=>"2.0", id => $id, method => "mortal", params => { a => 2, b => "two" } }),
+            status => 200,
+            json   => {
                 jsonrpc => "2.0", 
-                id => 123, 
-                error => { 
+                id      => $id, 
+                error   => { 
                     code    => JRPCInternalError, 
                     message => "Simulate... well... something",
                     data    => {
