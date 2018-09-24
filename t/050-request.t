@@ -7,6 +7,7 @@ use JSON::Fast;
 plan 2;
 
 subtest "Basics", {
+    plan 4;
     use Basic-JRPC;
 
     test-service routes, {
@@ -59,6 +60,7 @@ subtest "Basics", {
                 },
             ],
             ;
+
         test get( '/api' ),
                 status => 500,
                 content-type => "text/plain",
@@ -149,4 +151,5 @@ subtest "Actor Class" => {
 }
 
 done-testing;
+
 # vim: ft=perl6
