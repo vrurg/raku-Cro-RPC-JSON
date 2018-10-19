@@ -1,50 +1,45 @@
 {
+  "provides": {
+    "Cro::RPC::JSON::Handler": "lib/Cro/RPC/JSON/Handler.pm6",
+    "Cro::RPC::JSON::Exception": "lib/Cro/RPC/JSON/Exception.pm6",
+    "Cro::RPC::JSON::RequestParser": "lib/Cro/RPC/JSON/RequestParser.pm6",
+    "Cro::RPC::JSON::Message": "lib/Cro/RPC/JSON/Message.pm6",
+    "Cro::RPC::JSON": "lib/Cro/RPC/JSON.pm6",
+    "Cro::RPC::JSON::ResponseSerializer": "lib/Cro/RPC/JSON/ResponseSerializer.pm6"
+  },
+  "production": true,
   "depends": [
-    "Cro::HTTP::Router",
-    "Cro::HTTP::Request",
-    "Cro::Transform",
-    "Cro::Message",
+    "Cro::HTTP",
     "JSON::Fast"
   ],
-  "authors": [
-    "Vadim Belman <vrurg@cpan.org>"
-  ],
-  "provides": {
-    "Cro::RPC::JSON::ResponseSerializer": "lib/Cro/RPC/JSON/ResponseSerializer.pm6",
-    "Cro::RPC::JSON": "lib/Cro/RPC/JSON.pm6",
-    "Cro::RPC::JSON::Exception": "lib/Cro/RPC/JSON/Exception.pm6",
-    "Cro::RPC::JSON::Message": "lib/Cro/RPC/JSON/Message.pm6",
-    "Cro::RPC::JSON::RequestParser": "lib/Cro/RPC/JSON/RequestParser.pm6",
-    "Cro::RPC::JSON::Handler": "lib/Cro/RPC/JSON/Handler.pm6"
-  },
-  "version": "0.0.903",
-  "resources": [
-    
-  ],
-  "source-url": "git://github.com/vrurg/Perl6-Cro-RPC-JSON.git",
   "license": "Artistic-2.0",
+  "name": "Cro::RPC::JSON",
   "support": {
     "source": "https://github.com/vrurg/Perl6-Cro-RPC-JSON.git"
   },
-  "name": "Cro::RPC::JSON",
-  "meta-version": "0",
+  "description": "Cro JSON-RPC implementation",
   "auth": "github:vrurg",
-  "build-depends": [
-    "META6",
-    "p6doc",
-    "Pod::To::Markdown"
-  ],
-  "perl": "6.*",
-  "production": true,
   "tags": [
     "Cro",
     "JSON-RPC"
+  ],
+  "source-url": "git://github.com/vrurg/Perl6-Cro-RPC-JSON.git",
+  "perl": "6.*",
+  "meta-version": "0",
+  "authors": [
+    "Vadim Belman <vrurg@cpan.org>"
+  ],
+  "version": "0.0.4",
+  "resources": [
+    
+  ],
+  "build-depends": [
+    
   ],
   "test-depends": [
     "Test",
     "Test::META",
     "Test::When",
     "Cro::HTTP::Test"
-  ],
-  "description": "Cro JSON-RPC implementation"
+  ]
 }
