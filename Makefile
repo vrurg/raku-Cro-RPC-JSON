@@ -1,6 +1,6 @@
 
 MAIN_MOD=lib/Cro/RPC/JSON.pm6
-MOD_VER:=$(shell perl6 -Ilib -e 'use Cro::RPC::JSON; Cro::RPC::JSON::VER.^ver.say')
+MOD_VER:=$(shell perl6 -Ilib -e 'use Cro::RPC::JSON::VER; Cro::RPC::JSON::VER.^ver.say')
 MOD_NAME_PFX=Cro-RPC-JSON
 MOD_DISTRO=$(MOD_NAME_PFX)-$(MOD_VER)
 MOD_ARCH=$(MOD_DISTRO).tar.gz
@@ -9,7 +9,8 @@ META_BUILDER=./build-tools/gen-META.p6
 
 DIST_FILES := $(git ls-files)
 
-CLEAN_FILES=$(MOD_NAME_PFX)-v*.tar.gz
+CLEAN_FILES=$(MOD_NAME_PFX)-v*.tar.gz \
+			META6.json.out
 CLEAN_DIRS=lib/.precomp
 
 all: release
