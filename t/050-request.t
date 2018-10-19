@@ -156,19 +156,25 @@ subtest "Actor Class" => {
 
         $id++;
 
-        test post('api', json => { jsonrpc=>"2.0", id => $id, method => "mortal", params => { a => 2, b => "two" } }),
-            status => 200,
-            json   => {
-                jsonrpc => "2.0", 
-                id      => $id, 
-                error   => { 
-                    code    => JRPCInternalError, 
-                    message => "Simulate... well... something",
-                    data    => {
-                        exception => 'X::AdHoc',
-                    },
-                }
-            };
+        if %*ENV<AUTHOR_TESTING> {
+            test post('api', json => { jsonrpc=>"2.0", id => $id, method => "mortal", params => { a => 2, b => "two" } }),
+                status => 200,
+                json   => {
+                    jsonrpc => "2.0", 
+                    id      => $id, 
+                    error   => { 
+                        code    => JRPCInternalError, 
+                        message => "Simulate... well... something",
+                        data    => {
+                            exception => 'X::AdHoc',
+                            backtrace => / .* /,
+                        },
+                    }
+                };
+        }
+        else {
+            skip "for author testing only", 1;
+        }
     };
 }
 
