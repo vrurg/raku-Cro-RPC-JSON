@@ -95,8 +95,6 @@ package Cro::RPC::JSON {
     use Cro::RPC::JSON::Handler;
     use Cro::RPC::JSON::Exception;
 
-    module VER:ver<0.0.3>:auth<cpan:VRURG> {}
-
     proto json-rpc (|) is export { * }
 
     multi json-rpc ( Code $block ) {
@@ -189,7 +187,10 @@ package Cro::RPC::JSON {
                         #note "INTERNAL FAIL [{$_.WHO}]: ", ~$_, ~$_.backtrace;
                         X::Cro::RPC::JSON::InternalError.new( 
                             msg  => ~$_,
-                            data => %( exception => $_.^name ),
+                            data => %( 
+                                exception => $_.^name,
+                                backtrace => ~$_.backtrace,
+                            ),
                         ).throw
                     }
                 }
