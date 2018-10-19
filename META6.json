@@ -1,37 +1,31 @@
 {
-  "source-url": "git://github.com/vrurg/Perl6-Cro-RPC-JSON.git",
-  "description": "Cro JSON-RPC implementation",
-  "production": true,
-  "build-depends": [
-    "META6",
-    "p6doc",
-    "Pod::To::Markdown"
-  ],
-  "support": {
-    "source": "https://github.com/vrurg/Perl6-Cro-RPC-JSON.git"
-  },
-  "provides": {
-    "Cro::RPC::JSON": "lib/Cro/RPC/JSON.pm6",
-    "Cro::RPC::JSON::Exception": "lib/Cro/RPC/JSON/Exception.pm6",
-    "Cro::RPC::JSON::Handler": "lib/Cro/RPC/JSON/Handler.pm6",
-    "Cro::RPC::JSON::Message": "lib/Cro/RPC/JSON/Message.pm6",
-    "Cro::RPC::JSON::ResponseSerializer": "lib/Cro/RPC/JSON/ResponseSerializer.pm6",
-    "Cro::RPC::JSON::RequestParser": "lib/Cro/RPC/JSON/RequestParser.pm6"
-  },
-  "auth": "github:vrurg",
+  "license": "Artistic-2.0",
   "tags": [
     "Cro",
     "JSON-RPC"
   ],
-  "depends": [
-    "Cro::HTTP::Router",
-    "Cro::HTTP::Request",
-    "Cro::Transform",
-    "Cro::Message",
-    "JSON::Fast"
-  ],
+  "name": "Cro::RPC::JSON",
+  "perl": "6.*",
+  "support": {
+    "source": "https://github.com/vrurg/Perl6-Cro-RPC-JSON.git"
+  },
+  "version": "0.0.4",
+  "auth": "github:vrurg",
   "authors": [
     "Vadim Belman <vrurg@cpan.org>"
+  ],
+  "production": true,
+  "description": "Cro JSON-RPC implementation",
+  "source-url": "git://github.com/vrurg/Perl6-Cro-RPC-JSON.git",
+  "depends": [
+    "Cro::HTTP",
+    "JSON::Fast"
+  ],
+  "resources": [
+    
+  ],
+  "build-depends": [
+    
   ],
   "test-depends": [
     "Test",
@@ -39,12 +33,13 @@
     "Test::When",
     "Cro::HTTP::Test"
   ],
-  "version": "0.0.3",
-  "name": "Cro::RPC::JSON",
-  "resources": [
-    
-  ],
-  "license": "Artistic-2.0",
-  "perl": "6.*",
-  "meta-version": "0"
+  "meta-version": "0",
+  "provides": {
+    "Cro::RPC::JSON::Handler": "lib/Cro/RPC/JSON/Handler.pm6",
+    "Cro::RPC::JSON::ResponseSerializer": "lib/Cro/RPC/JSON/ResponseSerializer.pm6",
+    "Cro::RPC::JSON::RequestParser": "lib/Cro/RPC/JSON/RequestParser.pm6",
+    "Cro::RPC::JSON": "lib/Cro/RPC/JSON.pm6",
+    "Cro::RPC::JSON::Exception": "lib/Cro/RPC/JSON/Exception.pm6",
+    "Cro::RPC::JSON::Message": "lib/Cro/RPC/JSON/Message.pm6"
+  }
 }
