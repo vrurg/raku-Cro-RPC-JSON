@@ -2,7 +2,7 @@
 
 use lib <lib>;
 use META6;
-use Cro::RPC::JSON;
+use Cro::RPC::JSON::VER;
 
 my $m = META6.new(
     name           => 'Cro::RPC::JSON',
@@ -10,14 +10,11 @@ my $m = META6.new(
     version        => Cro::RPC::JSON::VER.^ver,
     perl-version   => Version.new('6.*'),
     depends        => <
-        Cro::HTTP::Router
-        Cro::HTTP::Request
-        Cro::Transform
-        Cro::Message
+        Cro::HTTP
         JSON::Fast
     >,
     test-depends   => <Test Test::META Test::When Cro::HTTP::Test>,
-    build-depends  => <META6 p6doc Pod::To::Markdown>,
+    #build-depends  => <META6 p6doc Pod::To::Markdown>,
     tags           => <Cro JSON-RPC>,
     authors        => ['Vadim Belman <vrurg@cpan.org>'],
     auth           => 'github:vrurg',
