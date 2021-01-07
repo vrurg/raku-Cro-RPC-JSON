@@ -1,11 +1,11 @@
 
-MAIN_MOD=lib/Cro/RPC/JSON.pm6
-MOD_VER:=$(shell perl6 -Ilib -e 'use Cro::RPC::JSON::VER; Cro::RPC::JSON::VER.^ver.say')
+MAIN_MOD=lib/Cro/RPC/JSON.rakumod
+MOD_VER:=$(shell perl6 -Ilib -e 'use Cro::RPC::JSON; Cro::RPC::JSON.^ver.say')
 MOD_NAME_PFX=Cro-RPC-JSON
 MOD_DISTRO=$(MOD_NAME_PFX)-$(MOD_VER)
 MOD_ARCH=$(MOD_DISTRO).tar.gz
 META=META6.json
-META_BUILDER=./build-tools/gen-META.p6
+META_BUILDER=./build-tools/gen-META.raku
 
 DIST_FILES := $(git ls-files)
 

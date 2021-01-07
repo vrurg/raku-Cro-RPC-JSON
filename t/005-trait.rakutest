@@ -1,10 +1,6 @@
 use Test;
 use Cro::RPC::JSON;
 
-#role Bar {
-#    method jrpc-bar (:$foo) is json_rpc {}
-#}
-
 subtest "Basic" => {
     plan 4;
 
@@ -18,7 +14,7 @@ subtest "Basic" => {
     $inst = Foo.new;
 
     for <foo bar> -> $jmethod {
-        my $m = json-rpc-find-method($inst, $jmethod);
+        my $m = $inst.^json-rpc-find-method($jmethod);
         ok so $m, "method $jmethod exists";
         is $inst.&$m, "method $jmethod", "valid return from $jmethod";
     }
@@ -29,19 +25,20 @@ subtest "Role" => {
 
     my $inst;
 
-    my role Bar {
-        method foo is json-rpc { "method foo" }
+    my role Bar[::T] {
+        method foo is json-rpc { note "METHOD foo, T=", T.^name; "method foo" }
         method jrpc-bar is json-rpc("bar") { "method bar" }
+        method non-jrpc { die "oops, shouldn't be used!" }
     }
 
-    my class Foo does Bar {
+    my class Foo does Bar[Int] {
     }
 
     $inst = Foo.new;
 
     for <foo bar> -> $jmethod {
-        my $m = json-rpc-find-method($inst, $jmethod);
-        ok so $m, "method $jmethod exists";
+        my $m = $inst.^json-rpc-find-method($jmethod);
+        ok $m.defined, "method $jmethod exists";
         is $inst.&$m, "method $jmethod", "valid return from $jmethod";
     }
 
@@ -68,7 +65,7 @@ subtest "Inheritance" => {
     $inst = Fubar.new;
 
     for <foo bar baz> -> $jmethod {
-        my $m = json-rpc-find-method( $inst, $jmethod);
+        my $m = $inst.^json-rpc-find-method($jmethod);
         ok so $m, "method $jmethod exists";
         is $inst.&$m, "method $jmethod", "valid return from $jmethod";
     }
@@ -81,6 +78,7 @@ subtest "Multi" => {
         proto method foo (|) is json-rpc { * }
         multi method foo () { "method foo" }
         method jrpc-bar is json-rpc("bar") { "method bar" }
+        multi method fubar(Str:D $s) { "method fubar( $s )" }
     }
 
     my class Baz does Bar {
@@ -94,14 +92,26 @@ subtest "Multi" => {
     my class Fubar is Foo {
         method baz is json-rpc { "method baz" }
         multi method foo ( Int $i, Str $s ) { "method foo( $i, $s )" }
+        multi method fubar(Int:D $i) is json-rpc { "method fubar( $i )" }
     }
 
     $inst = Fubar.new;
 
-    my $m = json-rpc-find-method( $inst, "foo" );
-    is $inst.&$m(), "method foo", "no params";
-    is $inst.&$m( pi ), "method foo( {pi} )", "Num";
-    is $inst.&$m( 314, "pi" ), "method foo( 314, pi )", "Int, Str";
+    my $foo = Fubar.^lookup('foo');
+#    note "&Fubar::foo: ", $foo.raku, " // ", $foo.WHICH,
+#         "\n - candidates: ", $foo.candidates.elems,
+#         "\n - package: ", $foo.package.^name
+#        ;
+
+    my &m = $inst.^json-rpc-find-method("foo");
+#    note "---- ", &m.raku, " // ", &m.WHICH;
+#    note " . Candidates: ", &m.candidates.elems;
+#    note " . Proto: ", &m.dispatcher.raku;
+#    note " . Multi: ", &m.multi;
+#    note " . Package: ", &m.package.^name;
+    is $inst.&m(), "method foo", "no params";
+    is $inst.&m( pi ), "method foo( {pi} )", "Num";
+    is $inst.&m( 314, "pi" ), "method foo( 314, pi )", "Int, Str";
 }
 
 done-testing;

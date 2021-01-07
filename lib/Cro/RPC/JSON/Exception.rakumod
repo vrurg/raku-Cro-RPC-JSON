@@ -1,3 +1,4 @@
+use v6.d;
 
 constant JRPCParseError     is export = -32700;
 constant JRPCInvalidRequest is export = -32600;
@@ -5,9 +6,9 @@ constant JRPCMethodNotFound is export = -32601;
 constant JRPCInvalidParams  is export = -32602;
 constant JRPCInternalError  is export = -32603;
 
-role X::Cro::RPC::JSON is export {
+role X::Cro::RPC::JSON {
     has Str $.msg; # Error text to report back to the client
-    has $.data;    # Could be transferred into Cro::RPC::JSON::Error .data attribute if set
+    has $.data;    # Could be transferred into Cro::RPC::JSON::MethodResponse::Error .data attribute if set
     
     method jrpc-code { ... } # Error code of JSON RPC, https://www.jsonrpc.org/specification
     method http-code { ... } # Error code of HTTP request, https://www.jsonrpc.org/historical/json-rpc-over-http.html
@@ -54,5 +55,5 @@ class X::Cro::RPC::JSON::MediaType is Exception does X::Cro::RPC::JSON {
     method http-code { 415 }
 }
 
-# Copyright (c) 2018, Vadim Belman <vrurg@cpan.org>
+# Copyright (c) 2018-2021, Vadim Belman <vrurg@cpan.org>
 

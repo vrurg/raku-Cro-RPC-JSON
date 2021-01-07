@@ -1,9 +1,12 @@
+use v6.d;
+use Cro::RPC::JSON;
+use Cro::RPC::JSON::Request;
+use Cro::RPC::JSON::Exception;
 use Cro::HTTP::Server;
 use Cro::HTTP::Router;
-use Cro::RPC::JSON;
 
 class JRPC-Actor is export {
-    method foo ( Int :$a, Str :$b ) is json-rpc {
+    method foo(Int :$a, Str :$b) is json-rpc {
         return "$b and $a";
     }
 

@@ -1,7 +1,10 @@
-use lib 't/lib';
+use lib $?FILE.IO.parent(1).add('lib');
+use lib $?FILE.IO.parent(2).add('lib');
 use Test;
 use Cro::HTTP::Test;
+use Cro::RPC::JSON;
 use Cro::RPC::JSON::Exception;
+use Cro::RPC::JSON::MethodResponse;
 use JSON::Fast;
 
 plan 2;
@@ -129,7 +132,7 @@ subtest "Actor Class" => {
                 id      => $id,
                 error   => {
                     code    => JRPCMethodNotFound,
-                    message => "Method JRPC-Actor::non-json: doesn't have 'is json-rpc' trait",
+                    message => "JSON-RPC method non-json is not implemented by JRPC-Actor",
                     data    => { method => "non-json" },
                 }
             };
@@ -143,7 +146,7 @@ subtest "Actor Class" => {
                 id      => $id,
                 error   => {
                     code    => JRPCMethodNotFound,
-                    message => "Method JRPC-Actor::no-method: doesn't exists",
+                    message => "JSON-RPC method no-method is not implemented by JRPC-Actor",
                     data    => { method => "no-method" },
                 }
             };

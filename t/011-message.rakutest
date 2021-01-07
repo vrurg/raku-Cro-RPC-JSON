@@ -1,5 +1,8 @@
 use Test;
 use Cro::RPC::JSON::Message;
+use Cro::RPC::JSON::MethodResponse;
+use Cro::RPC::JSON::Utils;
+use Cro::RPC::JSON;
 
 plan 2;
 
@@ -19,7 +22,7 @@ subtest "Error object" => {
 
     my $try = 1;
     for @errParams -> %errParams {
-        my $err = Cro::RPC::JSON::Error.new( |%errParams );
+        my $err = Cro::RPC::JSON::MethodResponse::Error.new( |%errParams );
 
         is-deeply $err.Hash, %errParams, "error object converted to hash {$try++}";
     }
@@ -33,7 +36,7 @@ subtest "Response object" => {
 
     for |(<error> X=> @errParams), result => {r1=>pi, r2=>"π"} -> $k {
         my $payload = $k.key ~~ 'error' ??
-            :error( Cro::RPC::JSON::Error.new( |$k.value ) )
+            :error( Cro::RPC::JSON::MethodResponse::Error.new( |$k.value ) )
             !!
             $k;
 
