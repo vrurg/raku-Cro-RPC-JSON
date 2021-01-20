@@ -115,7 +115,7 @@ depends: meta depends-install
 
 depends-install:
 	@echo "===> Installing dependencies"
-	@zef install META6 p6doc Pod::To::Markdown Async::Workers
+	@zef install META6 Pod::To::Markdown Async::Workers
 	@zef --deps-only install .
 
 version: doc meta clean
