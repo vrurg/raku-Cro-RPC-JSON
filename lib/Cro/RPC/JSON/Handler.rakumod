@@ -1,5 +1,5 @@
 use v6.d;
-unit class Cro::RPC::JSON::Handler;
+unit class Cro::RPC::JSON::Handler:api<2>;
 
 use Cro::Transform;
 use Cro::RPC::JSON::Exception;
@@ -8,80 +8,133 @@ use Cro::RPC::JSON::Request;
 use Cro::RPC::JSON::BatchRequest;
 use Cro::RPC::JSON::BatchResponse;
 use Cro::RPC::JSON::MethodResponse;
+use Cro::RPC::JSON::Notification;
 use Cro::RPC::JSON::Utils;
 
 also does Cro::Transform;
 
+has Str:D $.protocol is required;
 has &.code;
+has Supply $.async;
+#| WebSocket close promise
+has Promise $.close;
 
-multi method new (Code:D $code) { self.bless(:$code) }
+has Bool $!code-is-async;
+
+multi method new (Code:D $code, |c) { self.new(:$code, |c) }
+
+submethod TWEAK {
+    my $sign = &!code.signature;
+    $!code-is-async = ($sign.arity > 1) # Two-parameter code expects WebSockets $close
+                      || ($sign.params[0].type ~~ Supply) # Or expects a Supply as the first parameter
+                      || ($sign.returns ~~ Supply); # Or returns a Supply
+}
 
 method consumes { Cro::RPC::JSON::Message }
 method produces { Cro::RPC::JSON::Message }
 
-method transformer (Supply:D $in) {
-    supply {
-        #note "Handler supply";
-        whenever $in -> $msg {
-#            note "Handling JSON block ", $msg.perl;
-            my $jrpc-response;
-            given $msg {
-                when Cro::RPC::JSON::Request {
-                    $jrpc-response = self.handle-request( $_ );
-#                    note "GOT RESPONSE: ", $jrpc-response.raku;
+method transformer(Supply:D $in) {
+    if $!code-is-async {
+        my $out = Supplier.new;
+        my @pos = $out.Supply;
+        if &!code.signature.count > 1 {
+            with $!close {
+                @pos.push: $!close;
+            }
+            elsif &!code.signature.arity > 1 {
+                X::Cro::RPC::JSON::ServerError.new(
+                    :msg( "Can't provide 'close' argument in a non-WebSocket context" ),
+                    :code( JRPCContext ),
+                    ).throw;
+            }
+        }
+        my $*CRO-JRPC-PROTOCOL = $!protocol;
+        my $*CRO-JRPC-ASYNC = True;
+        my $from-user = &!code( |@pos );
+        supply {
+            whenever $in -> $msg {
+                my @reqs;
+                if $msg ~~ Cro::RPC::JSON::BatchRequest {
+                    @reqs.append: $msg.requests;
                 }
-                when Cro::RPC::JSON::BatchRequest {
-                    $jrpc-response = Cro::RPC::JSON::BatchResponse.new;
-                    for .requests -> $req {
-                        $jrpc-response.responses.push: self.handle-request( $req )
+                else {
+                    @reqs.push: $msg;
+                }
+                for @reqs -> $req {
+                    if $req.invalid {
+                        $req.respond;
                     }
-#                    note "RETURNING BATCH RESPONSE: ", $jrpc-response.responses;
+                    else {
+                        $out.emit($req)
+                    }
                 }
-                default {
+                LAST { $out.done }
+            }
+            whenever $from-user -> $resp {
+                if $resp ~~ Cro::RPC::JSON::MethodResponse | Cro::RPC::JSON::BatchResponse | Cro::RPC::JSON::Notification {
+                    emit $resp
+                }
+                else {
                     X::Cro::RPC::JSON::ServerError.new(
-                        msg => "Cannot handle a request object of type " ~ .^name
+                        :msg("Bad response of type '" ~ $resp.^name ~ "' produced by async code"),
+                        :code(JRPCErrGeneral),
                         ).throw;
                 }
             }
-            emit $jrpc-response;
+        };
+    }
+    else {
+        supply {
+            whenever $in -> $msg {
+                #            note "Handling JSON block ", $msg.perl;
+                my $*CRO-JRPC-PROTOCOL = $!protocol;
+                my $*CRO-JRPC-ASYNC = False;
+                given $msg {
+                    when Cro::RPC::JSON::Request {
+                        self.handle-request( $_ );
+                    }
+                    when Cro::RPC::JSON::BatchRequest {
+                        for .requests -> $req {
+                            self.handle-request( $req )
+                        }
+                    }
+                    default {
+                        X::Cro::RPC::JSON::ServerError.new(
+                            :msg("Cannot handle a request object of type " ~ .^name),
+                            :code(JRPCBadReqType),
+                            ).throw;
+                    }
+                }
+                $msg.respond;
+            }
+            with $!async {
+                whenever $_ -> $event {
+                    if $event ~~ Cro::RPC::JSON::Notification {
+                        emit $event
+                    }
+                    else {
+                        emit Cro::RPC::JSON::Notification.new(:json-body($event));
+                    }
+                }
+            }
         }
     }
 }
 
-method handle-request ( Cro::RPC::JSON::Request $req ) {
-    my $response = Cro::RPC::JSON::MethodResponse.new(
-        request => $req,
-        id => $req.id,
-        );
+method handle-request( Cro::RPC::JSON::Request $req ) {
+    my $*CRO-JRPC-RESPONSE =
+    my $response = $req.response;
 
-    #note "+++ Handling request on ", &!code;
+    my $*CRO-JRPC-REQUEST = $req;
 
-    if $req.invalid {
-        #note "INV REQUEST: ", $req.invalid;
-        $response.set-error( code => JRPCInvalidRequest, message => $req.invalid );
-    }
-    else {
-        $response.result = &!code( $req );
+    unless $req.invalid {
+        $response.set-result: &!code( $req );
         CATCH {
             when X::Cro::RPC::JSON {
-                #note "HANDLING JSON-RPC EXCEPTION";
-                #note " . data: ", .data;
-                $response.set-error( code => .jrpc-code, message => .msg );
-                $response.error.set-data($_) with .data;
-            }
-            default {
-                #note "HANDLER DEFAULT EXCEPTION: [{$_.WHO}]: ", ~$_;
-                $response.set-error(
-                    code => JRPCInternalError,
-                    message => ~$_,
-                    data => %( exception => .^name,
-                               backtrace => ~.backtrace, ),
-                    );
+                $response.set-error($_);
             }
         }
     }
-
-    return $response;
 }
 
 # Copyright (c) 2018-2021, Vadim Belman <vrurg@cpan.org>

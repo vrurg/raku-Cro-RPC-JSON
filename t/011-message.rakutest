@@ -31,16 +31,18 @@ subtest "Error object" => {
 subtest "Response object" => {
     plan 3;
 
-    my $resp;
     my $id = 1;
 
     for |(<error> X=> @errParams), result => {r1=>pi, r2=>"π"} -> $k {
+        my $req = Cro::RPC::JSON::Request.new:
+            data => %( :$id, :jsonrpc("2.0"), :method<foo>, params => %(),);
+
         my $payload = $k.key ~~ 'error' ??
             :error( Cro::RPC::JSON::MethodResponse::Error.new( |$k.value ) )
             !!
             $k;
 
-        my $resp = Cro::RPC::JSON::MethodResponse.new( :$id, |$payload );
+        my $resp = $req.response: |$payload;
         is-deeply $resp.Hash, %(:$id, |$k, :jsonrpc("2.0")), "convertion to hash {$id++}" ;
     };
 }

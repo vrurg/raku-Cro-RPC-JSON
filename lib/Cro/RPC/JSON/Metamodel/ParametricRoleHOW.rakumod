@@ -1,5 +1,5 @@
 use v6.d;
-unit role Cro::RPC::JSON::Metamodel::ParametricRoleHOW;
+unit role Cro::RPC::JSON::Metamodel::ParametricRoleHOW:api<2>;
 
 use Cro::RPC::JSON::Metamodel::MethodContainer;
 use Cro::RPC::JSON::Metamodel::ClassHOW;
@@ -16,3 +16,5 @@ method specialize_with (Mu \r, Mu:U \conc, Mu $, @params, | ) is raw {
     callsame();
     conc
 }
+
+# Copyright (c) 2018-2021, Vadim Belman <vrurg@cpan.org>

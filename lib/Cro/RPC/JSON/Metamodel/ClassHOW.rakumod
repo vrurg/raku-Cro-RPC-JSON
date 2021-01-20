@@ -1,5 +1,5 @@
 use v6.d;
-unit role Cro::RPC::JSON::Metamodel::ClassHOW;
+unit role Cro::RPC::JSON::Metamodel::ClassHOW:api<2>;
 
 use Cro::RPC::JSON::Method;
 use Cro::RPC::JSON::Metamodel::MethodContainer;
@@ -49,3 +49,5 @@ method json-rpc-find-method( Mu \type, Str:D $name --> Code) is raw {
     }
     $meth
 }
+
+# Copyright (c) 2018-2021, Vadim Belman <vrurg@cpan.org>

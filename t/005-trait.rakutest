@@ -1,5 +1,5 @@
 use Test;
-use Cro::RPC::JSON;
+use Cro::RPC::JSON:api<2>;
 
 subtest "Basic" => {
     plan 4;
@@ -26,7 +26,7 @@ subtest "Role" => {
     my $inst;
 
     my role Bar[::T] {
-        method foo is json-rpc { note "METHOD foo, T=", T.^name; "method foo" }
+        method foo is json-rpc { "method foo" }
         method jrpc-bar is json-rpc("bar") { "method bar" }
         method non-jrpc { die "oops, shouldn't be used!" }
     }
@@ -97,7 +97,7 @@ subtest "Multi" => {
 
     $inst = Fubar.new;
 
-    my $foo = Fubar.^lookup('foo');
+#    my $foo = Fubar.^lookup('foo');
 #    note "&Fubar::foo: ", $foo.raku, " // ", $foo.WHICH,
 #         "\n - candidates: ", $foo.candidates.elems,
 #         "\n - package: ", $foo.package.^name
@@ -110,7 +110,7 @@ subtest "Multi" => {
 #    note " . Multi: ", &m.multi;
 #    note " . Package: ", &m.package.^name;
     is $inst.&m(), "method foo", "no params";
-    is $inst.&m( pi ), "method foo( {pi} )", "Num";
+    is $inst.&m( π ), "method foo( {π} )", "Num";
     is $inst.&m( 314, "pi" ), "method foo( 314, pi )", "Int, Str";
 }
 

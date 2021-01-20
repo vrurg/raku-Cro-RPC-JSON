@@ -1,10 +1,11 @@
 use v6.d;
-unit role Cro::RPC::JSON::Metamodel::MethodContainer;
-
+unit role Cro::RPC::JSON::Metamodel::MethodContainer:api<2>;
+use nqp;
 use Cro::RPC::JSON::Exception;
 use Cro::RPC::JSON::Method;
 
 has %!jrpc-methods;
+has %!adhoc-methods;
 
 method json-rpc-add-method ( Mu \type, Str $jrpc-name, &meth ) {
 #    note "+ Registering '$jrpc-name' on ", type.^name, " of ", type.HOW.^name,
@@ -25,6 +26,13 @@ method json-rpc-add-method ( Mu \type, Str $jrpc-name, &meth ) {
         %!jrpc-methods{ $jrpc-name } = &meth.name;
     }
 }
+
+method json-rpc-add-adhoc(Mu \type, Str:D $mod, &meth) {
+    (%!adhoc-methods{$mod} //= []).push:  &meth;
+}
+
+method adhoc-methods(Mu, Str:D $mod --> List()) { %!adhoc-methods{$mod} // () }
+method async-methods(Mu --> List()) { %!adhoc-methods<async><> // () }
 
 method incorporate_multi_candidates(Mu \typeobj) {
     callsame();
@@ -99,3 +107,5 @@ method json-rpc-find-method ( Mu \type, Str $name --> Code ) is raw {
     # &meth would still be Nil if nothing found
     $meth
 }
+
+# Copyright (c) 2018-2021, Vadim Belman <vrurg@cpan.org>

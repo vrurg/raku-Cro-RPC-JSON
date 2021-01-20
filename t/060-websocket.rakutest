@@ -1,0 +1,421 @@
+use v6.d;
+use lib $?FILE.IO.parent(1).add('lib');
+use Cro::WebSocket::Client;
+use Cro::HTTP::Server;
+use Cro::HTTP::Router;
+use Cro::HTTP::Router::WebSocket;
+use Cro::RPC::JSON;
+use JSON::Fast;
+use Test;
+use Test::JRPC;
+use Test-Data;
+
+plan 5;
+
+sub get-connection {
+    my $client = Cro::WebSocket::Client.new: :json;
+    my $connection = $client.connect: 'http://localhost:3005/api';
+    #note "CONN: ", $connection.WHICH, " // ", $connection.^mro;
+    await Promise.anyof($connection, Promise.in(5));
+    if $connection.status != Kept {
+        flunk 'Connection promise is not Kept';
+        if $connection.status == Broken {
+            diag $connection.cause;
+        }
+        bail-out;
+    } else {
+        $connection = $connection.result;
+    }
+    $connection
+}
+
+sub get-server($app) {
+    my $server = Cro::HTTP::Server.new(port => 3005, application => $app);
+    $server.start;
+    $server
+}
+
+subtest "Synchronous Code", {
+    plan 3;
+    my $app = route {
+        get -> 'api' {
+            #        note "-> API";
+            json-rpc :ws, -> $req {
+                #                diag "REQ: " ~ $req.data;
+                is-deep-compare $req.data, {
+                    id => 111,
+                    jsonrpc => "2.0",
+                    method => "foo",
+                    params => { bar => 13 }
+                }, 'valid request received';
+                is-deep-compare $req.params, {bar => 13}, "parameters parsed";
+                { the-answer => 42, :foo<bar>, :a<b c> }
+            }
+        }
+    }
+
+    my $server = get-server($app);
+    LEAVE $server.stop;
+
+    my $connection = get-connection;
+    $connection.send({
+        :jsonrpc('2.0'),
+        :id<111>,
+        :method<foo>,
+        :params{bar => 13},
+    });
+
+    my $resp = $connection.messages.head.Promise;
+    await Promise.anyof($resp, Promise.in(5));
+
+    if $resp {
+        my $body = await (await $resp).body;
+        is-deep-compare $body, {
+            jsonrpc => "2.0",
+            id => 111,
+            result => {the-answer => 42, :foo<bar>, :a['b', 'c']}
+        }, "valid response received";
+    }
+    else {
+        fail "timed out awaiting for response";
+    }
+}
+
+subtest "Actor Class" => {
+    plan @Test-Data::jrpc-requests.elems;
+    use JRPC-Actor;
+
+    my $app = route {
+        get -> 'api' {
+            json-rpc :ws, JRPC-Actor.new;
+        }
+    };
+    my $server = get-server($app);
+    LEAVE $server.stop;
+
+    my $connection = get-connection;
+
+    my $*expected-jrpc-protocol = 'WebSocket';
+    for @Test-Data::jrpc-requests -> %req-data {
+        my $id = next-id;
+        my %json = jsonrpc => "2.0",
+                   :$id,
+                   method => %req-data<method>,
+                   |( params => $_ with %req-data<params> );
+        $connection.send: %json;
+        my $resp = $connection.messages.head.Promise;
+        await Promise.anyof($resp, Promise.in(5));
+        if $resp {
+            my %expected = %(
+                jsonrpc => "2.0",
+                :$id,
+                |( <result error>.map(-> $k { $k => $_ with %req-data{$k} }) )
+            );
+            my $body = await (await $resp).body;
+            #            diag "---> got: " ~ $body.raku;
+            #            diag "---> exp: " ~ %expected.raku;
+            is-deep-compare $body, %expected, %req-data<subtest>;
+        }
+        else {
+            flunk "Timed out: " ~ %req-data<subtest>;
+        }
+    }
+}
+
+subtest "Async Code" => {
+    plan 9;
+    my $close-code;
+    my $event-count = 0;
+    my $emitted-notifications = 0;
+    my $app = route {
+        get -> 'api' {
+            json-rpc :ws, -> $in, $close {
+                supply {
+                    whenever $in -> $req {
+                        $req.respond: { $req.method => $req.params.gist };
+                    }
+                    whenever $close { # Close promise
+                        $close-code = (await .body).read-uint16(0);
+                        done;
+                    }
+                    whenever Supply.interval(.5) {
+                        ++$event-count;
+                        jrpc-notify {
+                            :notification("tick-tock"),
+                            :params({count => $event-count});
+                        }
+                        ++$emitted-notifications;
+                    }
+                }
+            }
+        }
+    };
+    my $server = get-server($app);
+    LEAVE $server.stop;
+
+    my $connection = get-connection;
+
+    $connection.send({
+        jsonrpc => "2.0",
+        id => 0,
+        method => "foo",
+        params => [1,2,3],
+    });
+
+    my $cnt = 0;
+    react whenever $connection.messages -> $msg {
+        my %body = await $msg.body;
+        if %body<jsonrpc>:exists {
+            if %body<id>:exists {
+                given %body<id> {
+                    when 0 {
+                        is-deep-compare %body,
+                                        %( jsonrpc => "2.0",
+                                           id => 0,
+                                           result => %( foo => "[1 2 3]" ),
+                                        ),
+                                        "method foo response";
+                    }
+                    when 1 {
+                        is-deep-compare %body,
+                                        %( jsonrpc => "2.0",
+                                           id => 1,
+                                           result => %( bar => '{answer => 42, question => ?}' ),
+                                        ),
+                                        "method bar response";
+                    }
+                    default {
+                        flunk "Unexpected method response: " ~ %body.gist;
+                    }
+                }
+            }
+            else {
+                flunk "Missing 'id' in a JSON-RPC response: " ~ %body.gist;
+            }
+        }
+        else {
+            is ++$cnt, %body<params><count>, "event number $cnt";
+            if $cnt == 1 {
+                # A method response should be received alongside with the notifications
+                $connection.send({
+                    jsonrpc => "2.0",
+                    id => 1,
+                    method => "bar",
+                    params => { question => "?", answer => 42 }
+                });
+            }
+            if $cnt == 3 {
+                pass "all notifications collected";
+                whenever $connection.close(42, timeout => 5) {
+                    pass "connection closed";
+                    done;
+                }
+            }
+        }
+    }
+
+    is $cnt, 3, "received ";
+    is $close-code, 42, "websocket is closed with correct code";
+}
+
+subtest "Synchronous Code With Async Notifications" => {
+    plan 7;
+    my $close-code;
+    my $app = route {
+        get -> 'api' {
+            json-rpc :ws, {
+                {:foo<sync-bar>}
+            }, async => -> $close {
+                supply {
+                    my $count = 0;
+                    my $tap;
+                    whenever $close { # WebSocket close promise
+                        $close-code = (await .body).read-uint16(0);
+                        $tap.close;
+                    }
+                    $tap = do whenever Supply.interval(.1) {
+                        ++$count;
+                        emit {
+                            :notification("tick-tock"),
+                            :params({:$count})
+                        }
+                    }
+                }
+            }
+        }
+    };
+    my $server = get-server($app);
+
+    my $connection = get-connection;
+
+    my $id = 0;
+    my $cnt = 0;
+
+    $connection.send({
+        jsonrpc => "2.0",
+        id => ++$id,
+        method => "foo",
+        params => {msg => "bar"}
+    });
+
+    my $close;
+    react whenever $connection.messages -> $msg {
+        my %body = await $msg.body;
+        if %body<jsonrpc> {
+            is-deep-compare %body, %(
+                jsonrpc => "2.0",
+                id => 1,
+                result => %( :foo<sync-bar> ),
+            ), "method response";
+        }
+        else {
+            ++$cnt;
+            is-deep-compare %body, %(
+                :notification<tick-tock>, params => %( :count($cnt) ),
+            ), "notification " ~ $cnt;
+            if $cnt == 3 {
+                whenever $close = $connection.close(42, timeout => 10) {
+                    pass "connection closed";
+                    done;
+                }
+            }
+        }
+    }
+    $server.stop;
+
+    await $close;
+
+    is $cnt, 3, "all notifications received";
+    is $close-code, 42, "connection close code";
+}
+
+subtest "Async Notifications With Object" => {
+    plan 27;
+    use JRPC-WS-Actor;
+
+    my $actor = JRPC-WS-Actor.new;
+    my $app = route {
+        get -> 'api' {
+            json-rpc :ws, $actor;
+        }
+    };
+
+    my $server = get-server($app);
+
+    my $connection = get-connection;
+
+    my $id = 0;
+    $connection.send({
+        jsonrpc => "2.0",
+        id => ++$id,
+        method => "rpc.on",
+        params => {event => <ns1 ns2 ns3>},
+    });
+    $connection.send({
+        jsonrpc => "2.0",
+        id => ++$id,
+        method => "foo",
+        params => {msg => "bar"}
+    });
+
+    my $cnt = 0;
+    my $event-seq = 1;
+    my $closed;
+    react whenever $connection.messages -> $msg {
+        my %body = await $msg.body;
+        #note "<<< ", %body;
+        if %body<jsonrpc> {
+            if %body<id>:exists {
+                given %body<id> {
+                    when 1 | 4 {
+                        is-deep-compare %body,
+                                        %( jsonrpc => "2.0",
+                                           id => 1 | 4,
+                                           result => %( :ns1<ok>, :ns2<ok>, :ns3<ok> ),
+                                        ),
+                                        "method 'subscribe' response, id=" ~ $_;
+                    }
+                    when 3 | 5 {
+                        is-deep-compare %body,
+                                        %( jsonrpc => "2.0",
+                                           id => 3 | 5,
+                                           result => %( :ns1<ok>, :ns2<ok>, :ns3<ok> ),
+                                        ),
+                                        "method 'unsubscribe' response, id=" ~ $_;
+                        if $_ == 3 {
+                            Promise.in(3).then: {
+                                is $cnt, 3, "no notifications were received while unsubscribed";
+                                $event-seq = 1;
+                                # Every unsubscribe resets namespace counter by the agent object
+                                $connection.send({
+                                    jsonrpc => "2.0",
+                                    id => ++$id,
+                                    method => "rpc.on",
+                                    params => { event => <ns1 ns2 ns3> },
+                                });
+                            }
+                        }
+                        if $_ == 5 {
+                            # Last unsubscribe
+                            is $cnt, 5, "the final count of received events";
+                            whenever $closed = $connection.close(3141, timeout => 10) {
+                                pass "connection closed";
+                                done;
+                            }
+                        }
+                    }
+                    when 2 {
+                        is-deep-compare %body,
+                                        %( jsonrpc => "2.0",
+                                           id => 2,
+                                           result => "+bar+",
+                                        ),
+                                        "method 'foo' response, id=" ~ $_;
+                    }
+                    default {
+                        flunk "Unexpected method call response: " ~ %body.gist;
+                    }
+                }
+            }
+            else {
+                flunk "Missing 'id' in a JSON-RPC response: " ~ %body.gist;
+            }
+        }
+        else {
+            is-deep-compare %body,
+                            %(
+                                namespace => /^ ns <[1..3]> $/,
+                                params => $event-seq,
+                            ),
+                            "notification on namespace " ~ (%body<namespace> // '*unknown*') ~ " " ~ $event-seq;
+            if %body<namespace> eq 'ns3' {
+                ++$event-seq;
+                if ++$cnt == 3 {
+                    # Unsubscribe temporarily
+                    $connection.send({
+                        jsonrpc => "2.0",
+                        id => ++$id,
+                        method => "rpc.off",
+                        params => {event => <ns1 ns2 ns3>},
+                    });
+                }
+                if $cnt == 5 {
+                    $connection.send({
+                        jsonrpc => "2.0",
+                        id => ++$id,
+                        method => "rpc.off",
+                        params => {event => <ns1 ns2 ns3>},
+                    });
+                }
+            }
+        }
+    }
+    $server.stop;
+    await Promise.anyof($actor.closed, Promise.in(5));
+    is $actor.close-code, 3141, "connection close code";
+    is $actor.async-close-code, 3141, "actor's async method reacted to WebSocket closing";
+    is $actor.exhausted.status, Kept, "actor's 'last' hook";
+    is $actor.closed.status, Kept, "actor's done hook";
+}
+
+done-testing;

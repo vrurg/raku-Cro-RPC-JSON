@@ -1,52 +1,67 @@
 {
-  "name": "Cro::RPC::JSON",
-  "description": "Cro JSON-RPC implementation",
-  "version": "0.0.906",
-  "perl": {},
-  "meta-version": "0",
+  "api": 2,
+  "auth": "github:vrurg",
   "authors": [
     "Vadim Belman <vrurg@cpan.org>"
   ],
-  "auth": "github:vrurg",
+  "build-depends": [
+  ],
   "depends": [
     "Cro::HTTP",
-    "JSON::Fast"
+    "JSON::Fast",
+    "Cro::HTTP::Router",
+    "Cro::HTTP::Router::WebSocket"
   ],
-  "build-depends": [],
+  "description": "JSON-RPC 2.0 framework built on top of Cro",
+  "license": "Artistic-2.0",
+  "meta-version": "0",
+  "name": "Cro::RPC::JSON",
+  "perl": null,
+  "production": false,
+  "provides": {
+    "Cro::RPC::JSON": "lib/Cro/RPC/JSON.rakumod",
+    "Cro::RPC::JSON::BatchRequest": "lib/Cro/RPC/JSON/BatchRequest.rakumod",
+    "Cro::RPC::JSON::BatchResponse": "lib/Cro/RPC/JSON/BatchResponse.rakumod",
+    "Cro::RPC::JSON::Handler": "lib/Cro/RPC/JSON/Handler.rakumod",
+    "Cro::RPC::JSON::Message": "lib/Cro/RPC/JSON/Message.rakumod",
+    "Cro::RPC::JSON::Metamodel::ClassHOW": "lib/Cro/RPC/JSON/Metamodel/ClassHOW.rakumod",
+    "Cro::RPC::JSON::Metamodel::ConcreteRoleHOW": "lib/Cro/RPC/JSON/Metamodel/ConcreteRoleHOW.rakumod",
+    "Cro::RPC::JSON::Metamodel::MethodContainer": "lib/Cro/RPC/JSON/Metamodel/MethodContainer.rakumod",
+    "Cro::RPC::JSON::Metamodel::ParametricRoleHOW": "lib/Cro/RPC/JSON/Metamodel/ParametricRoleHOW.rakumod",
+    "Cro::RPC::JSON::Method": "lib/Cro/RPC/JSON/Method.rakumod",
+    "Cro::RPC::JSON::MethodResponse": "lib/Cro/RPC/JSON/MethodResponse.rakumod",
+    "Cro::RPC::JSON::Notification": "lib/Cro/RPC/JSON/Notification.rakumod",
+    "Cro::RPC::JSON::Request": "lib/Cro/RPC/JSON/Request.rakumod",
+    "Cro::RPC::JSON::RequestParser::BodyStr": "lib/Cro/RPC/JSON/RequestParser/BodyStr.rakumod",
+    "Cro::RPC::JSON::RequestParser::HTTP": "lib/Cro/RPC/JSON/RequestParser/HTTP.rakumod",
+    "Cro::RPC::JSON::RequestParser::WebSocket": "lib/Cro/RPC/JSON/RequestParser/WebSocket.rakumod",
+    "Cro::RPC::JSON::Response": "lib/Cro/RPC/JSON/Response.rakumod",
+    "Cro::RPC::JSON::ResponseSerializer::HTTP": "lib/Cro/RPC/JSON/ResponseSerializer/HTTP.rakumod",
+    "Cro::RPC::JSON::ResponseSerializer::WebSocket": "lib/Cro/RPC/JSON/ResponseSerializer/WebSocket.rakumod",
+    "Cro::RPC::JSON::Transform": "lib/Cro/RPC/JSON/Transform.rakumod",
+    "Cro::RPC::JSON::Utils": "lib/Cro/RPC/JSON/Utils.rakumod",
+    "X::Cro::RPC::JSON": "lib/Cro/RPC/JSON/Exception.rakumod"
+  },
+  "raku": "6.d",
+  "resources": [
+  ],
+  "source-url": "https://github.com/vrurg/raku-Cro-RPC-JSON.git",
+  "support": {
+    "bugtracker": "https://github.com/vrurg/raku-Cro-RPC-JSON/issues",
+    "source": "https://github.com/vrurg/raku-Cro-RPC-JSON.git"
+  },
+  "tags": [
+    "Cro",
+    "JSON-RPC",
+    "HTTP",
+    "WEB",
+    "JSON"
+  ],
   "test-depends": [
     "Test",
     "Test::META",
     "Test::When",
     "Cro::HTTP::Test"
   ],
-  "provides": {
-    "Cro::RPC::JSON": "lib/Cro/RPC/JSON.rakumod",
-    "Cro::RPC::JSON::BatchRequest": "lib/Cro/RPC/JSON/BatchRequest.rakumod",
-    "Cro::RPC::JSON::BatchResponse": "lib/Cro/RPC/JSON/BatchResponse.rakumod",
-    "Cro::RPC::JSON::Exception": "lib/Cro/RPC/JSON/Exception.rakumod",
-    "Cro::RPC::JSON::Handler": "lib/Cro/RPC/JSON/Handler.rakumod",
-    "Cro::RPC::JSON::Message": "lib/Cro/RPC/JSON/Message.rakumod",
-    "Cro::RPC::JSON::Metamodel::ClassHOW": "lib/Cro/RPC/JSON/Metamodel/ClassHOW.rakumod",
-    "Cro::RPC::JSON::Metamodel::ConcreteRoleHOW": "lib/Cro/RPC/JSON/Metamodel/ConcreteRoleHOW.pm6",
-    "Cro::RPC::JSON::Metamodel::MethodContainer": "lib/Cro/RPC/JSON/Metamodel/MethodContainer.rakumod",
-    "Cro::RPC::JSON::Metamodel::RoleHOW": "lib/Cro/RPC/JSON/Metamodel/RoleHOW.rakumod",
-    "Cro::RPC::JSON::Method": "lib/Cro/RPC/JSON/Method.pm6",
-    "Cro::RPC::JSON::MethodResponse": "lib/Cro/RPC/JSON/MethodResponse.rakumod",
-    "Cro::RPC::JSON::Request": "lib/Cro/RPC/JSON/Request.rakumod",
-    "Cro::RPC::JSON::RequestParser": "lib/Cro/RPC/JSON/RequestParser.rakumod",
-    "Cro::RPC::JSON::Response": "lib/Cro/RPC/JSON/Response.rakumod",
-    "Cro::RPC::JSON::ResponseSerializer": "lib/Cro/RPC/JSON/ResponseSerializer.rakumod"
-  },
-  "resources": [],
-  "support": {
-    "source": "https://github.com/vrurg/raku-Cro-RPC-JSON.git"
-  },
-  "license": "Artistic-2.0",
-  "tags": [
-    "Cro",
-    "JSON-RPC"
-  ],
-  "production": false,
-  "source-url": "git://github.com/vrurg/raku-Cro-RPC-JSON.git",
-  "raku": "6.d"
+  "version": "0.0.907"
 }

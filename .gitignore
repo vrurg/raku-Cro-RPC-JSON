@@ -1,2 +1,4 @@
 .precomp/
+.idea/
+*.iml
 Cro-RPC-JSON-v*

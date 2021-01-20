@@ -1,4 +1,4 @@
-unit role Cro::RPC::JSON::Method;
+unit role Cro::RPC::JSON::Method:api<2>;
 use Cro::RPC::JSON::Exception;
 
 has Str $.json-rpc-name;
@@ -17,3 +17,5 @@ method set-json-rpc-name(Str:D $jrpc-name --> Nil) {
     }
     $!json-rpc-name = $jrpc-name;
 }
+
+# Copyright (c) 2018-2021, Vadim Belman <vrurg@cpan.org>

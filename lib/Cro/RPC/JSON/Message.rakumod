@@ -1,43 +1,34 @@
 use v6.d;
-unit role Cro::RPC::JSON::Message;
+unit role Cro::RPC::JSON::Message:api<2>;
 =begin pod
 
 =head1 NAME
 
-C<Cro::RPC::JSON::Message> – for classes implementing C<Cro::Message> interface
+C<Cro::RPC::JSON::Message> – role defining standard C<Cro::RPC::JSON> message object
 
-=head1 DESCRIPTION
+=head1 ATTRIBUTES
 
-The following classes are used by C<Cro::RPC::JSON>:
-
-=item C<Cro::RPC::JSON::Message> -- Interface role
-=item C<Cro::RPC::JSON::Request> -- JSON-RPC request class
-=item C<Cro::RPC::JSON::Response> -- JSON-RPC response class
+=item C<$.json-body> – any JSONifiable object
 
 =end pod
+
 use Cro::Message;
 use Cro::RPC::JSON::Utils;
 use Cro::RPC::JSON::Exception;
 
 also does Cro::Message;
 
-=begin pod
-
-=head1 ATTRIBUTES
-
-=item C<$.jsonrpc> – contains JSON-RPC version
-=item C<$.id> – id field if defined in the RPC request
-
-=end pod
-
-has JRPCVersion $.jsonrpc; # Version string
-has JRPCId $.id;
+has $.json-body is rw;
 
 =begin pod
 
 =head1 SEE ALSO
 
-L<Cro|https://cro.services>
+L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.0.907/docs/md/Cro/RPC/JSON.md>,
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.0.907/docs/md/Cro/RPC/JSON/Request.md>,
+L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.0.907/docs/md/Cro/RPC/JSON/MethodResponse.md>,
+L<C<Cro::RPC::JSON::BatchRequest>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.0.907/docs/md/Cro/RPC/JSON/BatchRequest.md>,
+L<C<Cro::RPC::JSON::Notification>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.0.907/docs/md/Cro/RPC/JSON/Notification.md>
 
 =head1 AUTHOR
 
@@ -52,4 +43,3 @@ See the LICENSE file in this distribution.
 =end pod
 
 # Copyright (c) 2018-2021, Vadim Belman <vrurg@cpan.org>
-
