@@ -108,6 +108,10 @@ release-test:
 	@echo "===> Release testing"
 	@RELEASE_TESTING=1 $(PROVE)
 
+zef-test:
+	@echo "===> Test with zef"
+	@zef test .
+
 is-repo-clean:
 	@git diff-index --quiet HEAD || (echo "*ERROR* Repository is not clean, commit your changes first!"; exit 1)
 
@@ -123,7 +127,7 @@ depends-install:
 version: doc meta clean
 #	@git add . && git commit -m 'Minor: version bump'
 
-release: build is-repo-clean release-test archive
+release: build is-repo-clean release-test zef-test archive
 	@echo "===> Done releasing"
 
 meta6_mod:
