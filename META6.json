@@ -22,6 +22,7 @@
     "Cro::RPC::JSON": "lib/Cro/RPC/JSON.rakumod",
     "Cro::RPC::JSON::BatchRequest": "lib/Cro/RPC/JSON/BatchRequest.rakumod",
     "Cro::RPC::JSON::BatchResponse": "lib/Cro/RPC/JSON/BatchResponse.rakumod",
+    "Cro::RPC::JSON::Exception": "lib/Cro/RPC/JSON/Exception.rakumod",
     "Cro::RPC::JSON::Handler": "lib/Cro/RPC/JSON/Handler.rakumod",
     "Cro::RPC::JSON::Message": "lib/Cro/RPC/JSON/Message.rakumod",
     "Cro::RPC::JSON::Metamodel::ClassHOW": "lib/Cro/RPC/JSON/Metamodel/ClassHOW.rakumod",
@@ -39,8 +40,7 @@
     "Cro::RPC::JSON::ResponseSerializer::HTTP": "lib/Cro/RPC/JSON/ResponseSerializer/HTTP.rakumod",
     "Cro::RPC::JSON::ResponseSerializer::WebSocket": "lib/Cro/RPC/JSON/ResponseSerializer/WebSocket.rakumod",
     "Cro::RPC::JSON::Transform": "lib/Cro/RPC/JSON/Transform.rakumod",
-    "Cro::RPC::JSON::Utils": "lib/Cro/RPC/JSON/Utils.rakumod",
-    "X::Cro::RPC::JSON": "lib/Cro/RPC/JSON/Exception.rakumod"
+    "Cro::RPC::JSON::Utils": "lib/Cro/RPC/JSON/Utils.rakumod"
   },
   "raku": "6.d",
   "resources": [
@@ -63,5 +63,5 @@
     "Test::When",
     "Cro::HTTP::Test"
   ],
-  "version": "0.1.900"
+  "version": "0.1.901"
 }
