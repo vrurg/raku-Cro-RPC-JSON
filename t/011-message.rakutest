@@ -1,8 +1,8 @@
 use Test;
-use Cro::RPC::JSON::Message;
-use Cro::RPC::JSON::MethodResponse;
-use Cro::RPC::JSON::Utils;
-use Cro::RPC::JSON;
+use Cro::RPC::JSON:api<2>;
+use Cro::RPC::JSON::Message:api<2>;
+use Cro::RPC::JSON::MethodResponse:api<2>;
+use Cro::RPC::JSON::Request:api<2>;
 
 plan 2;
 

@@ -1,7 +1,7 @@
 use v6.d;
 unit class JRPC-Actor;
-use Cro::RPC::JSON;
-use Cro::RPC::JSON::Request;
+use Cro::RPC::JSON:api<2>;
+use Cro::RPC::JSON::Request:api<2>;
 use Cro::RPC::JSON::Exception;
 use Cro::HTTP::Server;
 use Cro::HTTP::Router;

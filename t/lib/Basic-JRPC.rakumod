@@ -2,7 +2,7 @@ use v6.d;
 unit module Basic-JRPC;
 use Cro::HTTP::Server;
 use Cro::HTTP::Router;
-use Cro::RPC::JSON;
+use Cro::RPC::JSON:api<2>;
 use Test;
 
 our sub routes {

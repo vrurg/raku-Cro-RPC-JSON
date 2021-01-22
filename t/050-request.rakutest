@@ -4,9 +4,9 @@ use Test;
 use Test::JRPC;
 use Cro::HTTP::Test;
 use Cro::HTTP::Router;
-use Cro::RPC::JSON;
+use Cro::RPC::JSON:api<2>;
 use Cro::RPC::JSON::Exception;
-use Cro::RPC::JSON::MethodResponse;
+use Cro::RPC::JSON::MethodResponse:api<2>;
 use JSON::Fast;
 use Test-Data;
 
@@ -36,10 +36,10 @@ subtest "Basics", {
                          content-type => 'application/json',
                          body => to-json( [
                              { jsonrpc => "2.0", id => 321, method => "go", params => <a b c> },
-                             { jsonrpc => "2.0", method => "go", params => <a b c> },
+                             { jsonrpc => "2.0", method => "go-notify", params => <a b c> },
                              { jsonrpc => "2.0", id => 322, method => "do", params => <d e f> },
                              { method  => "go", id => 323, params => "aaa" },
-                             { jsonrpc => "1.0", id => 324, method => "do", },
+                             { jsonrpc => "1.0", id => 324, method => "do-1", },
                              { jsonrpc => "2.0", id => 325, method => "rpc.method", },
                          ] ),
                                                     ),
@@ -69,7 +69,7 @@ subtest "Basics", {
                 test get( '/api' ),
                      status => 500,
                      content-type => "text/plain",
-                     body-text => /"500 JSON-RPC is only supported for POST method"/,
+                     body-text => /"JSON-RPC is only supported for POST method"/,
                      ;
             }
         }

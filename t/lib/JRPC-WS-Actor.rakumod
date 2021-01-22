@@ -1,6 +1,6 @@
 use v6.d;
 unit class JRPC-WS-Actor;
-use Cro::RPC::JSON;
+use Cro::RPC::JSON:api<2>;
 
 has %!subscriptions;
 has $.close-code;
@@ -43,8 +43,12 @@ method event-emitter(Promise $close?) is json-rpc(:async) {
     supply {
         whenever Supply.interval(.1) {
             for %!subscriptions.keys.sort -> $ns {
+                my $scount = ++%!subscriptions{$ns};
+                if $ns eq 'ns-dying' && $scount > 2 {
+                    die "mock unreliable notifications"
+                }
                 jrpc-notify %(
-                    :namespace($ns), :params(++%!subscriptions{$ns}),
+                    :namespace($ns), :params($scount),
                 );
             }
         }

@@ -2,6 +2,7 @@ use v6.d;
 unit module Cro::RPC::JSON:ver<0.0.907>:auth<cpan:VRURG>:api<2>;
 
 use Cro::HTTP::Router;
+use Cro::WebSocket::Message;
 use Cro::HTTP::Router::WebSocket;
 use Cro::RPC::JSON::Utils;
 use Cro::RPC::JSON::Exception;
@@ -173,10 +174,13 @@ the end of the cycle for server-side user code.
 
 In asynchronous mode things are pretty much different. First of all, it's not supported for objects; though they still
 can provide asynchronous notifications using C<json-rpc> trait C<:async> argument. Second, a code in asynchronous mode
-receives a L<C<Supply>|https://docs.raku.org/type/Supply> of incoming requests as an argument and must return a supply emitting
-L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.0.907/docs/md/Cro/RPC/JSON/MethodResponse.md> objects. This is the lowest mode of operation as in this case the code is plugged
-almost directly into a L<C<Cro>|https://cro.services> pipeline. See C<respond> helper method in
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.0.907/docs/md/Cro/RPC/JSON/Request.md> which allows to reduce the number of low-level operations needed to emit a resut.
+receives a L<C<Supply>|https://docs.raku.org/type/Supply> of incoming requests as an argument and must return a supply
+emitting
+L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.0.907/docs/md/Cro/RPC/JSON/MethodResponse.md>
+objects. This is the lowest mode of operation as in this case the code is plugged almost directly into a
+L<C<Cro>|https://cro.services> pipeline. See C<respond> helper method in
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.0.907/docs/md/Cro/RPC/JSON/Request.md>
+which allows to reduce the number of low-level operations needed to emit a resut.
 
 Here is an example of the most simplisic asynchronous code implementation. Note the strict typing used with C<$in>
 parameter. This is how we tell C<Cro::RPC::JSON> about our intention to operate asynchronously:
@@ -196,7 +200,7 @@ parameter. This is how we tell C<Cro::RPC::JSON> about our intention to operate 
 
 
 B<Note> that the same asynchronous code can be used for processing a HTTP request too. In this case C<:web-socket>
-argument is not used, C<get> turns into C<post>, and otherwise the code remains unchanged. But what remains the same is
+argument is not used, C<get> turns into C<post>, yet otherwise the code remains unchanged. But what remains the same is
 that C<$in> would emit exactly one request object corresponding to the single HTTP C<POST>. So, the only case when this
 approach makes sense if when same code object is re-used for both WebSocket and HTTP modes.
 
@@ -498,6 +502,19 @@ The object mode of operations is handled by an asynchronous code similar to this
 A C<:close> method is invoked when the supply block processing WebSocket requests is closed. Done by C<CLOSE> phaser on
 C<supply {...}> from the previous section.
 
+=head1 ERROR HANDLING
+
+C<Cro::RPC::JSON> tries to do as much as possible to handle any server-side errors and report them back to the client
+in a most reasonable way. I.e. if server code dies while processing a method call the client will receive a JSON-RPC
+object with C<error> key with correct error code, error message, and some additional data like server-side exception
+name and backtrace. But the thing to be remembered: all this related to the synchronous mode of operation only, which
+also includes actor classes method calls.
+
+The asynchronous mode is totally different here. Due to comparatively low-level approach, code in this mode has to take
+care of own exceptions. Otherwise if any exception gets leaked it breaks the processing pipeline and results in HTTP 500
+response or in WebSocket closing with 1011. This is related to all cases, where a C<Supply> is returned by a code, even
+to C<:async> methods.
+
 =end pod
 
 proto json-rpc ( | ) is export {*}
@@ -513,17 +530,21 @@ multi sub json-rpc ( &block, Bool :ws(:web-socket(:$websocket)) where not * ) {
                     Cro::RPC::JSON::ResponseSerializer::HTTP.new,
             );
     CATCH {
+        $response.set-body(.message ~ "\n" ~ .backtrace);
+        $response.remove-header('Content-Type');
+        $response.append-header('Content-Type', q[text/plain; charset=utf-8]);
+
         when X::Cro::RPC::JSON {
             $response.status = .http-code;
         }
         default {
             $response.status = 500;
-            content 'text/plain', '500 ' ~ .message;
         }
     };
     react {
         whenever $pipeline.transformer(supply { emit $request }) -> $msg {
-            $response.append-header('Content-type', q[application/json; charset=utf-8]);
+            $response.remove-header('Content-Type');
+            $response.append-header('Content-Type', q[application/json; charset=utf-8]);
             $response.set-body($msg.json-body);
             $response.status = 200;
         }
@@ -599,7 +620,7 @@ multi sub json-rpc ( Any:D $obj, Bool :ws(:web-socket($websocket)) ) {
                                     )
                         }
                         when X::Cro::RPC::JSON {
-                            $req.respond: :exception( $_ );
+                            $req.respond: exception => $_;
                         }
                         default {
                             $req.respond:
@@ -644,6 +665,17 @@ multi sub json-rpc ( Any:D $obj, Bool :ws(:web-socket($websocket)) ) {
                         }
                         else {
                             emit Cro::RPC::JSON::Notification.new(:json-body( $_ ));
+                        }
+                        QUIT {
+                            default {
+                                emit Cro::WebSocket::Message.new(
+                                    opcode => Cro::WebSocket::Message::Close,
+                                    fragmented => False,
+                                    body-byte-stream => supply {
+                                        emit Blob.new([243, 3]);
+                                        done;
+                                    });
+                            }
                         }
                     }
                 }

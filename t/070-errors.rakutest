@@ -1,0 +1,57 @@
+use v6.d;
+use lib $?FILE.IO.parent(1).add('lib');
+use Test;
+use Test::JRPC;
+use Cro::RPC::JSON:api<2>;
+
+plan 1;
+
+# Protect from accidental opening of the same port by different tests.
+# Doesn't save from cases when the port is occupied by a system service.
+my $*CRO-RPC-JSON-PORT = 3013;
+
+subtest "WebSocket Actor Class Async Dying" => {
+    plan 3;
+    my $model = ClientServer.new;
+    my $server = $model.server;
+    my $connection = $model.connection;
+    LAST $server.stop;
+
+    $connection.send: %(
+        jsonrpc => '2.0',
+        id => next-id,
+        method => "rpc.on",
+        params => { event => ("ns-dying",) },
+    );
+
+    my $max-received = 0;
+    my $timed-out = False;
+
+    react {
+        whenever $connection.messages -> $msg {
+            my %body = await $msg.body;
+
+            if %body<jsonrpc>:exists {
+                # Skip the response to rpc.on call
+                next;
+            }
+            else {
+                $max-received = %body<params>;
+            }
+            LAST done;
+            QUIT { note ">>>>>>>!!!!!!", .raku; }
+        }
+        whenever Promise.in(10) {
+            # The event emitter on the server side must die far before the 10sec timeout expires
+            $timed-out = True;
+            done;
+        }
+    }
+
+    nok $timed-out, "server died as expected";
+    is $max-received, 2, "only two events were emitted";
+
+    my $msg = await $connection.closer;
+    my $code = (await $msg.body-byte-stream).read-uint16(0);
+    is $code, 1011, "WebSocket closed with internal error code";
+}
