@@ -123,9 +123,9 @@ method is-notification(::?CLASS:D: --> Bool:D) {
 method response(|c --> Cro::RPC::JSON::MethodResponse) {
     unless $!response {
         $!response = Cro::RPC::JSON::MethodResponse.new: |c, :request(self);
-        $!response.set-error: code => JRPCInvalidRequest, message => $_ with $!invalid;
         # Add this response to related batch response object if part of a batch request
         .response.add: $!response with $!batch;
+        $!response.set-error: code => JRPCInvalidRequest, message => $_ with $!invalid;
     }
     $!response
 }
@@ -144,12 +144,13 @@ multi method respond(Any:D $data --> Nil) {
 }
 
 multi method respond(--> Nil) {
+    my $response = self.response;
     with $!batch {
         # Only emit a batch response if the related batch request has been fulfilled
         .respond
     }
     else {
-        emit self.response;
+        emit $response;
     }
 }
 
