@@ -65,13 +65,17 @@ method transformer(Supply:D $in) {
                         $req.respond;
                     }
                     else {
-                        $out.emit($req)
+                        $out.emit($req);
                     }
                 }
                 LAST { $out.done }
             }
             whenever $from-user -> $resp {
-                if $resp ~~ Cro::RPC::JSON::MethodResponse | Cro::RPC::JSON::BatchResponse | Cro::RPC::JSON::Notification {
+                if $resp ~~ Cro::RPC::JSON::MethodResponse
+                            | Cro::RPC::JSON::BatchResponse
+                            | Cro::RPC::JSON::Notification
+                            | Cro::Message
+                {
                     emit $resp
                 }
                 else {
