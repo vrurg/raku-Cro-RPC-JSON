@@ -47,7 +47,7 @@ our sub META6 {
         'Cro::RPC::JSON::ResponseSerializer::WebSocket' => 'lib/Cro/RPC/JSON/ResponseSerializer/WebSocket.rakumod',
         'Cro::RPC::JSON::Transform'                     => 'lib/Cro/RPC/JSON/Transform.rakumod',
         'Cro::RPC::JSON::Utils'                         => 'lib/Cro/RPC/JSON/Utils.rakumod',
-        'X::Cro::RPC::JSON'                             => 'lib/Cro/RPC/JSON/Exception.rakumod',
+        'Cro::RPC::JSON::Exception'                     => 'lib/Cro/RPC/JSON/Exception.rakumod',
     },
     :production,
 }

@@ -10,6 +10,8 @@ MOD_NAME_PFX=$(subst ::,-,$(MAIN_MOD))
 MOD_DISTRO=$(MOD_NAME_PFX)-$(MOD_VER)
 MOD_ARCH=$(MOD_DISTRO).tar.gz
 META=META6.json
+META_MOD=$(MAIN_MOD)::META
+META_MOD_FILE=$(addprefix lib/,$(addsuffix .rakumod,$(subst ::,/,$(META_MOD))))
 BUILD_TOOLD_DIR=./build-tools
 META_BUILDER=$(BUILD_TOOLD_DIR)/gen-META.raku
 DOC_BUILDER=$(BUILD_TOOLD_DIR)/gen-doc.raku
@@ -106,6 +108,10 @@ release-test:
 	@echo "===> Release testing"
 	@RELEASE_TESTING=1 $(PROVE)
 
+zef-test:
+	@echo "===> Test with zef"
+	@zef test .
+
 is-repo-clean:
 	@git diff-index --quiet HEAD || (echo "*ERROR* Repository is not clean, commit your changes first!"; exit 1)
 
@@ -121,7 +127,7 @@ depends-install:
 version: doc meta clean
 #	@git add . && git commit -m 'Minor: version bump'
 
-release: build is-repo-clean release-test archive
+release: build is-repo-clean release-test zef-test archive
 	@echo "===> Done releasing"
 
 meta6_mod:
@@ -140,7 +146,7 @@ $(MOD_ARCH): $(DIST_FILES)
 	@git push -f --tags
 	@git archive --prefix="$(MOD_DISTRO)/" -o $(MOD_ARCH) $(MOD_VER)
 
-$(META): $(META_BUILDER) $(MAIN_MOD_FILE)
+$(META): $(META_BUILDER) $(MAIN_MOD_FILE) $(META_MOD_FILE)
 	@echo "===> Generating $(META)"
 	@$(META_BUILDER) $(MAIN_MOD) >$(META).out && cp $(META).out $(META)
 	@rm $(META).out
