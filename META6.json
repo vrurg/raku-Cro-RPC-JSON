@@ -17,7 +17,7 @@
   "meta-version": "0",
   "name": "Cro::RPC::JSON",
   "perl": null,
-  "production": false,
+  "production": true,
   "provides": {
     "Cro::RPC::JSON": "lib/Cro/RPC/JSON.rakumod",
     "Cro::RPC::JSON::BatchRequest": "lib/Cro/RPC/JSON/BatchRequest.rakumod",
@@ -63,5 +63,5 @@
     "Test::When",
     "Cro::HTTP::Test"
   ],
-  "version": "0.0.907"
+  "version": "0.1.0"
 }

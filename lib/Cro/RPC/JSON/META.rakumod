@@ -49,5 +49,5 @@ our sub META6 {
         'Cro::RPC::JSON::Utils'                         => 'lib/Cro/RPC/JSON/Utils.rakumod',
         'X::Cro::RPC::JSON'                             => 'lib/Cro/RPC/JSON/Exception.rakumod',
     },
-    :!production,
+    :production,
 }
