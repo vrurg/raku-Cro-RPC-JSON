@@ -18,7 +18,7 @@ ATTRIBUTES
 
   * `Str $.invalid` – undefined for valid requests. Otherwise contains error message explaining the cause.
 
-  * `$.batch` - if request is part of a [batch request](https://www.jsonrpc.org/specification#batch) then this attribute points to corresponding [`Cro::RPC::JSON::BatchRequest`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.0/docs/md/Cro/RPC/JSON/BatchRequest.md) object
+  * `$.batch` - if request is part of a [batch request](https://www.jsonrpc.org/specification#batch) then this attribute points to corresponding [`Cro::RPC::JSON::BatchRequest`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/BatchRequest.md) object
 
 METHODS
 =======
@@ -38,7 +38,7 @@ Returns *True* if request is a [notification](https://www.jsonrpc.org/specificat
 `response(|c)`
 --------------
 
-Returns a [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.0/docs/md/Cro/RPC/JSON/MethodResponse.md) object paired with the current request. Most of the time this method must be given preference over creating a method response object manually.
+Returns a [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md) object paired with the current request. Most of the time this method must be given preference over creating a method response object manually.
 
 `proto respond()`
 -----------------

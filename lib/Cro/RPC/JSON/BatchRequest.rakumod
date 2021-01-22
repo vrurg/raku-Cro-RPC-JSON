@@ -12,9 +12,9 @@ This class must not be manipulated directly under normal circumstances.
 
 =head1 ATTRIBUTES
 
-=item C<$.pending> - number of pending requests, i.e. those for which responses were not completed yet (see L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.0/docs/md/Cro/RPC/JSON/MethodResponse.md>)
+=item C<$.pending> - number of pending requests, i.e. those for which responses were not completed yet (see L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md>)
 =item C<Promise:D $.completed> – this promise is kept when all responses are completed
-=item L<C<Cro::RPC::JSON::BatchResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.0/docs/md/Cro/RPC/JSON/BatchResponse.md>C< $.response> – batch response object paired to this batch request
+=item L<C<Cro::RPC::JSON::BatchResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/BatchResponse.md>C< $.response> – batch response object paired to this batch request
 
 =head1 METHODS
 
@@ -73,10 +73,10 @@ method respond {
 
 =head1 SEE ALSO
 
-L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.0/docs/md/Cro/RPC/JSON.md>,
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.0/docs/md/Cro/RPC/JSON/Request.md>,
-L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.0/docs/md/Cro/RPC/JSON/MethodResponse.md>,
-L<C<Cro::RPC::JSON::BatchRequest>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.0/docs/md/Cro/RPC/JSON/BatchRequest.md>,
+L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON.md>,
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md>,
+L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md>,
+L<C<Cro::RPC::JSON::BatchRequest>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/BatchRequest.md>,
 
 =head1 AUTHOR
 
