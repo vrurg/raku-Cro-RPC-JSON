@@ -34,6 +34,10 @@ method transformer ( Supply $in ) {
                 when Cro::RPC::JSON::Notification {
                     $jresponse = .json-body; # Notifications come in raw form, as emitted by user code
                 }
+                when Cro::WebSocket::Message {
+                    emit $msg;
+                    next;
+                }
                 default {
                     X::Cro::RPC::JSON::ServerError.new(
                         :msg("Cannot handle a request object of type " ~ .^name),

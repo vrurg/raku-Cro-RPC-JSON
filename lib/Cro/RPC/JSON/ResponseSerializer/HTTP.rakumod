@@ -30,6 +30,10 @@ method transformer ( Supply $in ) {
                     }
                     $jresponse.json-body = @rlist;
                 }
+                when Cro::HTTP::Message {
+                    emit $msg;
+                    next;
+                }
                 default {
                     self!jsonify-exception:
                         X::Cro::RPC::JSON::ServerError.new(
