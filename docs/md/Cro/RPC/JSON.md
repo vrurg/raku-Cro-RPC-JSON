@@ -140,7 +140,7 @@ Here is an example of the most simplisic asynchronous code implementation. Note 
         }
     }
 
-**Note** that the same asynchronous code can be used for processing a HTTP request too. In this case `:web-socket` argument is not used, `get` turns into `post`, and otherwise the code remains unchanged. But what remains the same is that `$in` would emit exactly one request object corresponding to the single HTTP `POST`. So, the only case when this approach makes sense if when same code object is re-used for both WebSocket and HTTP modes.
+**Note** that the same asynchronous code can be used for processing a HTTP request too. In this case `:web-socket` argument is not used, `get` turns into `post`, yet otherwise the code remains unchanged. But what remains the same is that `$in` would emit exactly one request object corresponding to the single HTTP `POST`. So, the only case when this approach makes sense if when same code object is re-used for both WebSocket and HTTP modes.
 
 The above example can be extended to provide additional functionality when operating on a WebSocket:
 
@@ -393,6 +393,13 @@ The object mode of operations is handled by an asynchronous code similar to this
 ### `:close`
 
 A `:close` method is invoked when the supply block processing WebSocket requests is closed. Done by `CLOSE` phaser on `supply {...}` from the previous section.
+
+ERROR HANDLING
+==============
+
+`Cro::RPC::JSON` tries to do as much as possible to handle any server-side errors and report them back to the client in a most reasonable way. I.e. if server code dies while processing a method call the client will receive a JSON-RPC object with `error` key with correct error code, error message, and some additional data like server-side exception name and backtrace. But the thing to be remembered: all this related to the synchronous mode of operation only, which also includes actor classes method calls.
+
+The asynchronous mode is totally different here. Due to comparatively low-level approach, code in this mode has to take care of own exceptions. Otherwise if any exception gets leaked it breaks the processing pipeline and results in HTTP 500 response or in WebSocket closing with 1011. This is related to all cases, where a `Supply` is returned by a code, even to `:async` methods.
 
 VERSIONS
 ========
