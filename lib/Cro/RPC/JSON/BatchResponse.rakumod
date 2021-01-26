@@ -12,7 +12,7 @@ C<Cro::RPC::JSON::BatchResponse> - container of a list of responses to a batch r
 
 Adds a new response object to the list
 
-=head2 C<responses(--> Seq:D)>
+=head2 C<jrpc-responses(--> Seq:D)>
 
 Returns all response objects.
 
@@ -21,29 +21,29 @@ Returns all response objects.
 use Cro::RPC::JSON::MethodResponse;
 use Cro::RPC::JSON::Message;
 
-also does Cro::Message;
+also does Cro::RPC::JSON::Message;
 
-has Cro::RPC::JSON::MethodResponse @!responses;
+has Cro::RPC::JSON::MethodResponse @!jrpc-responses;
 has Lock:D $!res-lock .= new;
 
 method add(::?CLASS:D: Cro::RPC::JSON::MethodResponse:D $resp) {
     $!res-lock.lock;
     LEAVE $!res-lock.unlock;
-    @!responses.append: $resp;
+    @!jrpc-responses.append: $resp;
 }
 
-method responses(::?CLASS:D: --> Seq:D ) {
-    @!responses.Seq
+method jrpc-responses( ::?CLASS:D: --> Seq:D ) {
+    @!jrpc-responses.Seq
 }
 
 =begin pod
 
 =head1 SEE ALSO
 
-L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON.md>,
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md>,
-L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md>,
-L<C<Cro::RPC::JSON::BatchRequest>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/BatchRequest.md>,
+L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON.md>,
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md>,
+L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/MethodResponse.md>,
+L<C<Cro::RPC::JSON::BatchRequest>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/BatchRequest.md>,
 
 =head1 AUTHOR
 

@@ -25,6 +25,16 @@ method fail is json-rpc {
     $ex.throw;
 }
 
+method cro-request is json-rpc {
+    given request {
+        %(
+            request => .^name,
+            path => .path,
+            method => .method,
+        )
+    }
+}
+
 method mortal is json-rpc {
     die "Simulate... well... something";
 }

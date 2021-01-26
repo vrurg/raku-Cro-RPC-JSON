@@ -244,6 +244,7 @@ subtest "Actor Class" => {
     my $connection = $model.connection;
 
     my $*expected-jrpc-protocol = 'WebSocket';
+    my $*expected-jrpc-method = 'GET';
     for @Test-Data::jrpc-requests -> %req-data {
         my $id = next-id;
         my %json = jsonrpc => "2.0",

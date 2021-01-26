@@ -1,6 +1,7 @@
 use v6.d;
 unit class JRPC-WS-Actor;
 use Cro::RPC::JSON:api<2>;
+use Cro::HTTP::Router;
 
 has %!subscriptions;
 has $.close-code;

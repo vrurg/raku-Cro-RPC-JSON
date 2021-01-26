@@ -3,10 +3,10 @@ unit class Cro::RPC::JSON::RequestParser::HTTP:api<2>;
 
 use Cro::Transform;
 use Cro::RPC::JSON::Exception;
-use Cro::RPC::JSON::RequestParser::BodyStr;
+use Cro::RPC::JSON::RequestParser;
 
+also is Cro::RPC::JSON::RequestParser;
 also does Cro::Transform;
-also does Cro::RPC::JSON::RequestParser::BodyStr;
 
 method consumes { Cro::HTTP::Request }
 method produces { Cro::RPC::JSON::Message }

@@ -12,7 +12,6 @@ use Test-Data;
 
 plan 2;
 
-
 subtest "Basics", {
     use Basic-JRPC;
     my @basics = ['Sync', &Basic-JRPC::routes], ['Async', &Basic-JRPC::async-routes];
@@ -24,7 +23,8 @@ subtest "Basics", {
             test-service &r(), {
 
                 test post('api', content-type => "application/notjson"),
-                     status => 415 ;
+                     status => 415,
+                     ;
 
                 test post('api', json => { jsonrpc=>"2.0", id=>123, method => "oops", params => [1,2,3] }),
                      status => 200,
@@ -93,6 +93,7 @@ subtest "Actor Class" => {
     test-service routes, {
         test-given '/api', {
             my $*expected-jrpc-protocol = 'HTTP';
+            my $*expected-jrpc-method = 'POST';
             for @Test-Data::jrpc-requests -> %req-data {
                 my $id = next-id;
                 my (%json, %expect);

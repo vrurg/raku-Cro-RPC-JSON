@@ -1,5 +1,5 @@
 use v6.d;
-unit module Cro::RPC::JSON:ver<0.1.1>:auth<cpan:VRURG>:api<2>;
+unit module Cro::RPC::JSON:ver<0.1.2>:auth<cpan:VRURG>:api<2>;
 
 use Cro::HTTP::Router;
 use Cro::WebSocket::Message;
@@ -108,7 +108,7 @@ More information about exporting methods for JSON-RPC is provided in C<json-rpc>
 Handling a JSON-RPC request by a code object is considered more low-level approach. Particular format of the code is
 determined by wether it operates in synchronous or asynchronous mode (see below), general principle is: the code is
 provided with a
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md>
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md>
 object and must produce JSONifiable return value which is then returned to the client. The L<#SYNOPSIS> provides the
 most simple case of a synchronous code object. Any call to JSON-RPC to any method in the example will return:
 
@@ -168,7 +168,7 @@ C<:async> in sections dedicated to C<json-rpc> routine and C<json-rpc> trait.
 
 Hopefully, by this moment it is clear that in synchronous mode of operation user code receives a request in either raw,
 as
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md>
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md>
 instance, or in a "prepared" form as method arguments. One way or another, a JSONifiable response is produced and that's
 the end of the cycle for server-side user code.
 
@@ -176,10 +176,10 @@ In asynchronous mode things are pretty much different. First of all, it's not su
 can provide asynchronous notifications using C<json-rpc> trait C<:async> argument. Second, a code in asynchronous mode
 receives a L<C<Supply>|https://docs.raku.org/type/Supply> of incoming requests as an argument and must return a supply
 emitting
-L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md>
+L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/MethodResponse.md>
 objects. This is the lowest mode of operation as in this case the code is plugged almost directly into a
 L<C<Cro>|https://cro.services> pipeline. See C<respond> helper method in
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md>
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md>
 which allows to reduce the number of low-level operations needed to emit a resut.
 
 Here is an example of the most simplisic asynchronous code implementation. Note the strict typing used with C<$in>
@@ -316,9 +316,9 @@ B<Note> that contrary to the asynchronous code above we don't use C<jrpc-notify>
 in the case of asynchronous code there is no way for C<Cro::RPC::JSON> core to tell the difference between a reponse to
 a JSON-RPC method call or a notification if they both are hashes, for example, as both are coming from the same supply.
 That's why one have to wrap them in either
-L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md>
+L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/MethodResponse.md>
 or
-L<C<Cro::RPC::JSON::Notification>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Notification.md>
+L<C<Cro::RPC::JSON::Notification>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Notification.md>
 containers. Besides, when it comes to responding to a method call in the asynchronous model the order of responses is
 not determined. That's why use of C<$req.respond> ensures that the data emitted has the right C<id> field set in
 JSON-RPC response object.
@@ -326,15 +326,15 @@ JSON-RPC response object.
 =head2 C<jrpc-request>
 
 Returns currently being processed
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md>
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md>
 object where applicable and the object is not directly available. Mostly useful for methods of actor class.
 
 =head2 C<jrpc-response>
 
 Returns currently being processed
-L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md>
+L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/MethodResponse.md>
 object where applicable and the object is not directly available. Mostly useful for methods of actor class. Also
-available as C<jrpc-request.response>.
+available as C<jrpc-request.jrpc-response>.
 
 =head2 C<jrpc-protocol>
 
@@ -353,7 +353,7 @@ code objects. Similarly, C<jrpc-request> and C<jrpc-response> are not available 
 
 This subroutine is a conivenience means to reduce the boilerplate of asynchronous code emitting notifications. All it
 does is wraps it's argument into a
-L<C<Cro::RPC::JSON::Notification>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Notification.md>
+L<C<Cro::RPC::JSON::Notification>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Notification.md>
 instance and calls C<emit> with the object.
 
 =head1 CREATING AN ACTOR CLASS
@@ -397,7 +397,7 @@ Apparently, this turns any JSON array into positional parameters; and any JSON o
 limitations of JSON format, there is no way to pass both named and positionals at the same time.
 
 The only exception from this rule are methods with a single parameter typed with
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md>.
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md>.
 This way the server code indicates that it wants to do in-depth analysis of the incoming requests and expects a raw
 request object. In this case the method cannot be a C<multi> to prevent possible ambiguities.
 
@@ -452,7 +452,7 @@ C<:async> modificator must be used with methods providing asynchronous events fo
 L<C<json-rpc>|#json-rpc> C<:async> named argument apply:
 
 =item the method must return a supply emitting either
- L<C<Cro::RPC::JSON::Notification>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Notification.md>
+ L<C<Cro::RPC::JSON::Notification>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Notification.md>
  instances or JSONifiable objects
 =item the method may have a single parameter – the WebSocket C<$close> L<C<Promise>|https://docs.raku.org/type/Promise>
 
@@ -502,6 +502,18 @@ The object mode of operations is handled by an asynchronous code similar to this
 A C<:close> method is invoked when the supply block processing WebSocket requests is closed. Done by C<CLOSE> phaser on
 C<supply {...}> from the previous section.
 
+=head1 NOTES
+
+=head2 Cro's C<request> Object
+
+One way or another every JSON-RPC request is bound to a HTTP request not matter of the underlying transport. For this
+reason a number of classes in C<Cro::RPC::JSON> provide C<request> accessor which contains an instance of
+L<C<Cro::HTTP::Request>|https://cro.services/docs/reference/cro-http-request> which started the current
+JSON-RPC pipeline. Also, Cro's C<request> term provides access to the object wherever applicable.
+
+Note that for WebSockets transport the request object is the one about the initial HTTP request which was then upgraded.
+It can be used, for example, to validate the HTTP session "owning" the current WebSockets connection.
+
 =head1 ERROR HANDLING
 
 C<Cro::RPC::JSON> tries to do as much as possible to handle any server-side errors and report them back to the client
@@ -525,9 +537,9 @@ multi sub json-rpc ( &block, Bool :ws(:web-socket(:$websocket)) where not * ) {
 
     my Cro::Transform $pipeline =
         Cro.compose(label => "JSON-RPC Handler",
-                    Cro::RPC::JSON::RequestParser::HTTP.new,
-                    Cro::RPC::JSON::Handler.new(&block, :protocol<HTTP>),
-                    Cro::RPC::JSON::ResponseSerializer::HTTP.new,
+                    Cro::RPC::JSON::RequestParser::HTTP.new(:$request),
+                    Cro::RPC::JSON::Handler.new(&block, :$request, :protocol<HTTP>),
+                    Cro::RPC::JSON::ResponseSerializer::HTTP.new(:$request),
             );
     CATCH {
         $response.set-body(.message ~ "\n" ~ .backtrace);
@@ -555,16 +567,17 @@ multi sub json-rpc( &block,
                     Bool :ws(:web-socket(:$websocket)) where so *,
                     :&async )
 {
+    my $request = request;
     web-socket -> $in, $close {
-        my %hparams = :$close, :protocol<WebSocket>;
+        my %hparams = :$close, :protocol<WebSocket>, :$request;
         with &async {
             %hparams<async> = Supply(&async( $close ));
         }
         my Cro::Transform $pipeline =
             Cro.compose(label => "WebSocket JSON-RPC Handler",
-                        Cro::RPC::JSON::RequestParser::WebSocket.new,
+                        Cro::RPC::JSON::RequestParser::WebSocket.new(:$request),
                         Cro::RPC::JSON::Handler.new(&block, |%hparams),
-                        Cro::RPC::JSON::ResponseSerializer::WebSocket.new,
+                        Cro::RPC::JSON::ResponseSerializer::WebSocket.new(:$request),
                 );
         $pipeline.transformer($in)
     }
@@ -633,6 +646,8 @@ multi sub json-rpc ( Any:D $obj, Bool :ws(:web-socket($websocket)) ) {
                         }
                     }
 
+                    # Make Cro's `request` term work in actor methods
+                    my $*CRO-ROUTER-REQUEST = $req.request;
                     my $*CRO-JRPC-PROTOCOL = $websocket ?? 'WebSocket' !! 'HTTP';
                     my $*CRO-JRPC-ASYNC = False;
                     $req.respond: $obj.$method(|$params);
@@ -734,24 +749,13 @@ BEGIN {
 
 =begin pod
 
-=head1 VERSIONS
-
-=head2 v0.1.0
-
-The module has undergone major rewrite in this version. Most notable changes are:
-
-=item Introduced WebSockets support, including pushing notifications back to clients
-=item Added complete support for parameterized roles
-=item Added different mode of operations
-=item Changes in API this module provides require it to get C<:api<2>> adverb.
-
 =head1 SEE ALSO
 
 L<C<Cro>|https://cro.services>,
-L<C<Cro::RPC::JSON::Message>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Message.md>,
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md>,
-L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md>,
-L<C<Cro::RPC::JSON::Notification>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Notification.md>
+L<C<Cro::RPC::JSON::Message>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Message.md>,
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md>,
+L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/MethodResponse.md>,
+L<C<Cro::RPC::JSON::Notification>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Notification.md>
 
 =head1 AUTHOR
 

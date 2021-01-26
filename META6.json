@@ -2,7 +2,7 @@
   "api": 2,
   "auth": "github:vrurg",
   "authors": [
-    "Vadim Belman <vrurg@cpan.org>"
+    "Vadim Belman <vrurg@lflat.org>"
   ],
   "build-depends": [
   ],
@@ -33,10 +33,13 @@
     "Cro::RPC::JSON::MethodResponse": "lib/Cro/RPC/JSON/MethodResponse.rakumod",
     "Cro::RPC::JSON::Notification": "lib/Cro/RPC/JSON/Notification.rakumod",
     "Cro::RPC::JSON::Request": "lib/Cro/RPC/JSON/Request.rakumod",
+    "Cro::RPC::JSON::RequestParser": "lib/Cro/RPC/JSON/RequestParser.rakumod",
     "Cro::RPC::JSON::RequestParser::BodyStr": "lib/Cro/RPC/JSON/RequestParser/BodyStr.rakumod",
     "Cro::RPC::JSON::RequestParser::HTTP": "lib/Cro/RPC/JSON/RequestParser/HTTP.rakumod",
     "Cro::RPC::JSON::RequestParser::WebSocket": "lib/Cro/RPC/JSON/RequestParser/WebSocket.rakumod",
+    "Cro::RPC::JSON::Requestish": "lib/Cro/RPC/JSON/Requestish.rakumod",
     "Cro::RPC::JSON::Response": "lib/Cro/RPC/JSON/Response.rakumod",
+    "Cro::RPC::JSON::ResponseSerializer": "lib/Cro/RPC/JSON/ResponseSerializer.rakumod",
     "Cro::RPC::JSON::ResponseSerializer::HTTP": "lib/Cro/RPC/JSON/ResponseSerializer/HTTP.rakumod",
     "Cro::RPC::JSON::ResponseSerializer::WebSocket": "lib/Cro/RPC/JSON/ResponseSerializer/WebSocket.rakumod",
     "Cro::RPC::JSON::Transform": "lib/Cro/RPC/JSON/Transform.rakumod",
@@ -63,5 +66,5 @@
     "Test::When",
     "Cro::HTTP::Test"
   ],
-  "version": "0.1.1"
+  "version": "0.1.2"
 }

@@ -3,6 +3,7 @@ use Cro::RPC::JSON:api<2>;
 use Cro::RPC::JSON::Message:api<2>;
 use Cro::RPC::JSON::MethodResponse:api<2>;
 use Cro::RPC::JSON::Request:api<2>;
+use Cro::HTTP::Request;
 
 plan 2;
 
@@ -35,14 +36,20 @@ subtest "Response object" => {
 
     for |(<error> X=> @errParams), result => {r1=>pi, r2=>"π"} -> $k {
         my $req = Cro::RPC::JSON::Request.new:
-            data => %( :$id, :jsonrpc("2.0"), :method<foo>, params => %(),);
+            request => Cro::HTTP::Request.new, # A mock is ok, it's not gonna be used.
+            data => %(
+                :$id,
+                :jsonrpc("2.0"),
+                :method<foo>,
+                :params{},
+            );
 
         my $payload = $k.key ~~ 'error' ??
             :error( Cro::RPC::JSON::MethodResponse::Error.new( |$k.value ) )
             !!
             $k;
 
-        my $resp = $req.response: |$payload;
+        my $resp = $req.jrpc-response: |$payload;
         is-deeply $resp.Hash, %(:$id, |$k, :jsonrpc("2.0")), "convertion to hash {$id++}" ;
     };
 }

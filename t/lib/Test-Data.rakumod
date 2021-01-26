@@ -88,4 +88,14 @@ our @jrpc-requests =
         status => 200,
         result => -> $p { $p eq $*expected-jrpc-protocol },
     },
+    {
+        subtest => "access to Cro request",
+        method => 'cro-request',
+        status => 200,
+        result => {
+            request => 'Cro::HTTP::Request',
+            path => '/api',
+            method => -> $m { $m eq $*expected-jrpc-method },
+        }
+    },
     ;

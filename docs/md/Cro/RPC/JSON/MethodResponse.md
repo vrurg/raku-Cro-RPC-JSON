@@ -6,14 +6,14 @@ NAME
 DESCRIPTION
 ===========
 
-This class is a mediator between JSON-RPC actor code and the connected client. Normally it's only useful for asynchronous mode of operation (see [`Cro::JSON::RPC`](https://modules.raku.org/dist/Cro::JSON::RPC)). And even then it's better be created using [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md) `response` method.
+This class is a mediator between JSON-RPC actor code and the connected client. Normally it's only useful for asynchronous mode of operation (see [`Cro::JSON::RPC`](https://modules.raku.org/dist/Cro::JSON::RPC)). And even then it's better be created using [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md) `response` method.
 
 An instance of this class can be either in incomplete or completed state. The latter means that it has either `$.result` or `$.error` attribute set. Setting both of them is considered a error and `X::Cro::RPC::JSON::ServerError` is thrown then.
 
 Batches
 -------
 
-If `Cro::RPC::JSON::MethodResponse` belongs to batch response it reports back to the batch object of [`Cro::RPC::JSON::BatchResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/BatchResponse.md) when gets completed.
+If `Cro::RPC::JSON::MethodResponse` belongs to batch response it reports back to the batch object of [`Cro::RPC::JSON::BatchResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/BatchResponse.md) when gets completed.
 
 Class `Error`
 -------------
@@ -27,7 +27,7 @@ ATTRIBUTES
 
   * `$.error` – an instance of `Cro::RPC::JSON::MethodResponse::Error`
 
-  * `$.request` - request object to which this response is generated
+  * `$.jrpc-request` - [`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON.md) request object to which this response is generated
 
 Class `Error` Attributes
 ------------------------
@@ -75,7 +75,7 @@ Returns a hash ready to be used as JSON-RPC object `error` key value.
 SEE ALSO
 ========
 
-[`Cro`](https://cro.services), [`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON.md), [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md), [`Cro::RPC::JSON::BatchResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/BatchResponse.md)
+[`Cro`](https://cro.services), [`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON.md), [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md), [`Cro::RPC::JSON::BatchResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/BatchResponse.md)
 
 AUTHOR
 ======

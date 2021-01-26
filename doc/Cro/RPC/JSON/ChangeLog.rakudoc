@@ -1,0 +1,29 @@
+=begin pod
+=head1 VERSIONS
+
+=head2 v0.1.2
+
+=item Due to an overlooked naming conflict with Cro attributes and methods named C<request> and C<response> had to be
+    renamed. To maintain consistency with exported subs C<jrpc-request> and C<jrpc-response>, the attributes have
+    been renamed after them to C<$.jrpc-request> and C<$.jrpc-response>. Same has been done to the plural forms in
+    batch request classes. Unfortunately, the change is incompatible with v0.1.1. For this reason it was decided to
+    pull out both v0.1.0 and v0.1.1 from CPAN.
+=item Tighten bonds with L<Cro's|https://cro.services>
+    L<C<request>|https://cro.services/docs/reference/cro-http-request>. Now C<request> term exported by
+    L<C<Cro::HTTP::Router>|https://cro.services/docs/reference/cro-http-router> will work where applicable.
+=item Switching to L<C<zef>|https://github.com/tony-o/raku-fez> ecosystem
+
+=head2 v0.1.1
+
+Bugfixes
+
+=head2 v0.1.0
+
+The module has undergone major rewrite in this version. Most notable changes are:
+
+=item Introduced WebSockets support, including pushing notifications back to clients
+=item Added complete support for parameterized roles
+=item Added different mode of operations
+=item Changes in API this module provides require it to get C<:api<2>> adverb.
+
+=end pod

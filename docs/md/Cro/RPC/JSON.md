@@ -79,7 +79,7 @@ Whatever is returned by the method gets JSONified, wrapped into a valid JSON-RPC
 
 More information about exporting methods for JSON-RPC is provided in `json-rpc` trait section below.
 
-Handling a JSON-RPC request by a code object is considered more low-level approach. Particular format of the code is determined by wether it operates in synchronous or asynchronous mode (see below), general principle is: the code is provided with a [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md) object and must produce JSONifiable return value which is then returned to the client. The [SYNOPSIS](#SYNOPSIS) provides the most simple case of a synchronous code object. Any call to JSON-RPC to any method in the example will return:
+Handling a JSON-RPC request by a code object is considered more low-level approach. Particular format of the code is determined by wether it operates in synchronous or asynchronous mode (see below), general principle is: the code is provided with a [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md) object and must produce JSONifiable return value which is then returned to the client. The [SYNOPSIS](#SYNOPSIS) provides the most simple case of a synchronous code object. Any call to JSON-RPC to any method in the example will return:
 
     {
         jsonrpc: "2.0",
@@ -122,9 +122,9 @@ It is still possible though for both object and synchronous code mode cases to p
 
 ### Synchronous And Asynchronous
 
-Hopefully, by this moment it is clear that in synchronous mode of operation user code receives a request in either raw, as [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md) instance, or in a "prepared" form as method arguments. One way or another, a JSONifiable response is produced and that's the end of the cycle for server-side user code.
+Hopefully, by this moment it is clear that in synchronous mode of operation user code receives a request in either raw, as [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md) instance, or in a "prepared" form as method arguments. One way or another, a JSONifiable response is produced and that's the end of the cycle for server-side user code.
 
-In asynchronous mode things are pretty much different. First of all, it's not supported for objects; though they still can provide asynchronous notifications using `json-rpc` trait `:async` argument. Second, a code in asynchronous mode receives a [`Supply`](https://docs.raku.org/type/Supply) of incoming requests as an argument and must return a supply emitting [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md) objects. This is the lowest mode of operation as in this case the code is plugged almost directly into a [`Cro`](https://cro.services) pipeline. See `respond` helper method in [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md) which allows to reduce the number of low-level operations needed to emit a resut.
+In asynchronous mode things are pretty much different. First of all, it's not supported for objects; though they still can provide asynchronous notifications using `json-rpc` trait `:async` argument. Second, a code in asynchronous mode receives a [`Supply`](https://docs.raku.org/type/Supply) of incoming requests as an argument and must return a supply emitting [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/MethodResponse.md) objects. This is the lowest mode of operation as in this case the code is plugged almost directly into a [`Cro`](https://cro.services) pipeline. See `respond` helper method in [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md) which allows to reduce the number of low-level operations needed to emit a resut.
 
 Here is an example of the most simplisic asynchronous code implementation. Note the strict typing used with `$in` parameter. This is how we tell `Cro::RPC::JSON` about our intention to operate asynchronously:
 
@@ -238,17 +238,17 @@ This little trick allows us to use same synchronous code for serving both HTTP a
 
 This mode of operation is called *hybrid* because it combines both synchronous and asynchronous ones.
 
-**Note** that contrary to the asynchronous code above we don't use `jrpc-notify` to emit a notification. This is because in the case of asynchronous code there is no way for `Cro::RPC::JSON` core to tell the difference between a reponse to a JSON-RPC method call or a notification if they both are hashes, for example, as both are coming from the same supply. That's why one have to wrap them in either [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md) or [`Cro::RPC::JSON::Notification`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Notification.md) containers. Besides, when it comes to responding to a method call in the asynchronous model the order of responses is not determined. That's why use of `$req.respond` ensures that the data emitted has the right `id` field set in JSON-RPC response object.
+**Note** that contrary to the asynchronous code above we don't use `jrpc-notify` to emit a notification. This is because in the case of asynchronous code there is no way for `Cro::RPC::JSON` core to tell the difference between a reponse to a JSON-RPC method call or a notification if they both are hashes, for example, as both are coming from the same supply. That's why one have to wrap them in either [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/MethodResponse.md) or [`Cro::RPC::JSON::Notification`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Notification.md) containers. Besides, when it comes to responding to a method call in the asynchronous model the order of responses is not determined. That's why use of `$req.respond` ensures that the data emitted has the right `id` field set in JSON-RPC response object.
 
 `jrpc-request`
 --------------
 
-Returns currently being processed [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md) object where applicable and the object is not directly available. Mostly useful for methods of actor class.
+Returns currently being processed [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md) object where applicable and the object is not directly available. Mostly useful for methods of actor class.
 
 `jrpc-response`
 ---------------
 
-Returns currently being processed [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md) object where applicable and the object is not directly available. Mostly useful for methods of actor class. Also available as `jrpc-request.response`.
+Returns currently being processed [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/MethodResponse.md) object where applicable and the object is not directly available. Mostly useful for methods of actor class. Also available as `jrpc-request.jrpc-response`.
 
 `jrpc-protocol`
 ---------------
@@ -265,7 +265,7 @@ A [`Bool`](https://docs.raku.org/type/Bool) which is *True* if the code object p
 `jrpc-notify`
 -------------
 
-This subroutine is a conivenience means to reduce the boilerplate of asynchronous code emitting notifications. All it does is wraps it's argument into a [`Cro::RPC::JSON::Notification`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Notification.md) instance and calls `emit` with the object.
+This subroutine is a conivenience means to reduce the boilerplate of asynchronous code emitting notifications. All it does is wraps it's argument into a [`Cro::RPC::JSON::Notification`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Notification.md) instance and calls `emit` with the object.
 
 CREATING AN ACTOR CLASS
 =======================
@@ -302,7 +302,7 @@ Methods exported for JSON-RPC are invoked with parameters received from a JSON-R
 
 Apparently, this turns any JSON array into positional parameters; and any JSON object into named parameters. Due to the limitations of JSON format, there is no way to pass both named and positionals at the same time.
 
-The only exception from this rule are methods with a single parameter typed with [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md). This way the server code indicates that it wants to do in-depth analysis of the incoming requests and expects a raw request object. In this case the method cannot be a `multi` to prevent possible ambiguities.
+The only exception from this rule are methods with a single parameter typed with [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md). This way the server code indicates that it wants to do in-depth analysis of the incoming requests and expects a raw request object. In this case the method cannot be a `multi` to prevent possible ambiguities.
 
 *TODO*. Automatic marshalling/unmarshalling is considered for methods with a single parameter. But what'd be the best way to implement this functionality is yet to be decided.
 
@@ -346,7 +346,7 @@ Following are sections about the currently implemented trait modificators.
 
 `:async` modificator must be used with methods providing asynchronous events for WebSocket transport. Rules similar to [`json-rpc`](#json-rpc) `:async` named argument apply:
 
-  * the method must return a supply emitting either [`Cro::RPC::JSON::Notification`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Notification.md) instances or JSONifiable objects
+  * the method must return a supply emitting either [`Cro::RPC::JSON::Notification`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Notification.md) instances or JSONifiable objects
 
   * the method may have a single parameter – the WebSocket `$close` [`Promise`](https://docs.raku.org/type/Promise)
 
@@ -394,6 +394,16 @@ The object mode of operations is handled by an asynchronous code similar to this
 
 A `:close` method is invoked when the supply block processing WebSocket requests is closed. Done by `CLOSE` phaser on `supply {...}` from the previous section.
 
+NOTES
+=====
+
+Cro's `request` Object
+----------------------
+
+One way or another every JSON-RPC request is bound to a HTTP request not matter of the underlying transport. For this reason a number of classes in `Cro::RPC::JSON` provide `request` accessor which contains an instance of [`Cro::HTTP::Request`](https://cro.services/docs/reference/cro-http-request) which started the current JSON-RPC pipeline. Also, Cro's `request` term provides access to the object wherever applicable.
+
+Note that for WebSockets transport the request object is the one about the initial HTTP request which was then upgraded. It can be used, for example, to validate the HTTP session "owning" the current WebSockets connection.
+
 ERROR HANDLING
 ==============
 
@@ -401,26 +411,10 @@ ERROR HANDLING
 
 The asynchronous mode is totally different here. Due to comparatively low-level approach, code in this mode has to take care of own exceptions. Otherwise if any exception gets leaked it breaks the processing pipeline and results in HTTP 500 response or in WebSocket closing with 1011. This is related to all cases, where a `Supply` is returned by a code, even to `:async` methods.
 
-VERSIONS
-========
-
-v0.1.0
-------
-
-The module has undergone major rewrite in this version. Most notable changes are:
-
-  * Introduced WebSockets support, including pushing notifications back to clients
-
-  * Added complete support for parameterized roles
-
-  * Added different mode of operations
-
-  * Changes in API this module provides require it to get `:api<2>` adverb.
-
 SEE ALSO
 ========
 
-[`Cro`](https://cro.services), [`Cro::RPC::JSON::Message`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Message.md), [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Request.md), [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/MethodResponse.md), [`Cro::RPC::JSON::Notification`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.1/docs/md/Cro/RPC/JSON/Notification.md)
+[`Cro`](https://cro.services), [`Cro::RPC::JSON::Message`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Message.md), [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md), [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/MethodResponse.md), [`Cro::RPC::JSON::Notification`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Notification.md)
 
 AUTHOR
 ======

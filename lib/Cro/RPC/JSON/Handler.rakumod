@@ -5,6 +5,7 @@ use Cro::Transform;
 use Cro::RPC::JSON::Exception;
 use Cro::RPC::JSON::Message;
 use Cro::RPC::JSON::Request;
+use Cro::RPC::JSON::Requestish;
 use Cro::RPC::JSON::BatchRequest;
 use Cro::RPC::JSON::BatchResponse;
 use Cro::RPC::JSON::MethodResponse;
@@ -55,7 +56,7 @@ method transformer(Supply:D $in) {
             whenever $in -> $msg {
                 my @reqs;
                 if $msg ~~ Cro::RPC::JSON::BatchRequest {
-                    @reqs.append: $msg.requests;
+                    @reqs.append: $msg.jrpc-requests;
                 }
                 else {
                     @reqs.push: $msg;
@@ -98,7 +99,7 @@ method transformer(Supply:D $in) {
                         self.handle-request( $_ );
                     }
                     when Cro::RPC::JSON::BatchRequest {
-                        for .requests -> $req {
+                        for .jrpc-requests -> $req {
                             self.handle-request( $req )
                         }
                     }
@@ -117,7 +118,7 @@ method transformer(Supply:D $in) {
                         emit $event
                     }
                     else {
-                        emit Cro::RPC::JSON::Notification.new(:json-body($event));
+                        emit Cro::RPC::JSON::Notification.new(:json-body($event), :$.request);
                     }
                 }
             }
@@ -127,7 +128,9 @@ method transformer(Supply:D $in) {
 
 method handle-request( Cro::RPC::JSON::Request $req ) {
     my $*CRO-JRPC-RESPONSE =
-    my $response = $req.response;
+    my $response = $req.jrpc-response;
+    # Make Cro's `request` term work in synchronous code.
+    my $*CRO-ROUTER-REQUEST = $req.request;
 
     my $*CRO-JRPC-REQUEST = $req;
 
