@@ -13,6 +13,7 @@ use Cro::RPC::JSON::Notification;
 use Cro::RPC::JSON::Utils;
 
 also does Cro::Transform;
+also does Cro::RPC::JSON::Requestish;
 
 has Str:D $.protocol is required;
 has &.code;
