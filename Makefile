@@ -158,7 +158,7 @@ $(META): $(META_BUILDER) $(MAIN_MOD_FILE) $(META_MOD_FILE)
 	@rm $(META).out
 
 upload: release
-	@echo "===> Uploading to CPAN"
+	@echo "===> Uploading to the ecosystem"
 	@/bin/sh -c 'read -p "Do you really want to upload the module? (y/N) " answer; [ $$answer = "Y" -o $$answer = "y" ]'
 	@fez upload
 
