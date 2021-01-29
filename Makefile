@@ -117,7 +117,11 @@ zef-test:
 is-repo-clean:
 	@git diff-index --quiet HEAD || (echo "*ERROR* Repository is not clean, commit your changes first!"; exit 1)
 
-build: depends doc
+build: depends doc checkbuild
+
+checkbuild:
+	@echo "===> Check build integrity"
+	@fez --auth-mismatch-error checkbuild
 
 depends: meta depends-install
 
@@ -156,7 +160,6 @@ $(META): $(META_BUILDER) $(MAIN_MOD_FILE) $(META_MOD_FILE)
 upload: release
 	@echo "===> Uploading to CPAN"
 	@/bin/sh -c 'read -p "Do you really want to upload to CPAN? (y/N) " answer; [ $$answer = "Y" -o $$answer = "y" ]'
-	@fez --auth-mismatch-error checkbuild
 	@fez upload
 
 clean:
