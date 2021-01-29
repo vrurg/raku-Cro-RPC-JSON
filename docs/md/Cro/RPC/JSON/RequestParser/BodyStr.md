@@ -6,12 +6,12 @@ NAME
 ROLES
 =====
 
-Does [`Cro::RPC::JSON::Requestish`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Requestish.md)
+Does [`Cro::RPC::JSON::Requestish`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON/Requestish.md)
 
 SEE ALSO
 ========
 
-[`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON.md), [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Request.md), [`Cro::RPC::JSON::BatchRequest`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/BatchRequest.md), [Cro](https://cro.services)
+[`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON.md), [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON/Request.md), [`Cro::RPC::JSON::BatchRequest`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON/BatchRequest.md), [Cro](https://cro.services)
 
 AUTHOR
 ======
