@@ -18,7 +18,7 @@ our sub META6 {
     test-depends   => <Test Test::META Test::When Cro::HTTP::Test>,
     tags           => <Cro JSON-RPC HTTP WEB JSON>,
     authors        => ['Vadim Belman <vrurg@lflat.org>'],
-    auth           => 'github:vrurg',
+    auth           => 'zef:vrurg',
     source-url     => 'https://github.com/vrurg/raku-Cro-RPC-JSON.git',
     license        => 'Artistic-2.0',
     support        => META6::Support.new(
