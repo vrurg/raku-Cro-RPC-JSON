@@ -1,14 +1,16 @@
 use Test;
 use Cro::RPC::JSON:api<2>;
+use Cro::RPC::JSON::Metamodel::ClassHOW;
 
 subtest "Basic" => {
-    plan 4;
+    plan 7;
 
     my $inst;
 
     my class Foo {
         method foo (:$param1) is json-rpc { "method foo" }
         method jrpc-test (:$param1) is json-rpc("bar") { "method bar" }
+        method event-emitter($) is json-rpc(:async) { }
     }
 
     $inst = Foo.new;
@@ -18,10 +20,15 @@ subtest "Basic" => {
         ok so $m, "method $jmethod exists";
         is $inst.&$m, "method $jmethod", "valid return from $jmethod";
     }
+
+    my $async = Foo.^json-rpc-adhoc-methods('async');
+    isa-ok $async, List, "list of adhoc received";
+    is $async.elems, 1, "one async found";
+    is $async[0].name, "event-emitter", "async method found";
 }
 
 subtest "Role" => {
-    plan 4;
+    plan 5;
 
     my $inst;
 
@@ -34,6 +41,8 @@ subtest "Role" => {
     my class Foo does Bar[Int] {
     }
 
+    isa-ok Foo.HOW, Cro::RPC::JSON::Metamodel::ClassHOW, "actor role consumption results in an actor class";
+
     $inst = Foo.new;
 
     for <foo bar> -> $jmethod {
@@ -45,21 +54,28 @@ subtest "Role" => {
 }
 
 subtest "Inheritance" => {
-    plan 6;
+    plan 9;
     my $inst;
     my role Bar {
         method foo is json-rpc { "method foo" }
         method jrpc-bar is json-rpc("bar") { "method bar" }
+        method fubar is json-rpc { "method fubar" }
+        method emitter1 is json-rpc(:async) { "emitter1" }
+        multi method multi-emitter is json-rpc(:async) { "multi-emitter" }
     }
 
     my class Baz does Bar {
     }
 
     my class Foo is Baz {
+        # Override fubar and make it unavailable for JSON-RPC
+        method fubar { "non-RPC" }
+        method emitter2 is json-rpc(:async) { "emitter2" }
     }
 
     my class Fubar is Foo {
         method baz is json-rpc { "method baz" }
+        method emitter3 is json-rpc(:async) { "emitter3" }
     }
 
     $inst = Fubar.new;
@@ -69,6 +85,13 @@ subtest "Inheritance" => {
         ok so $m, "method $jmethod exists";
         is $inst.&$m, "method $jmethod", "valid return from $jmethod";
     }
+
+    my $m = $inst.^json-rpc-find-method('fubar');
+    isa-ok $m, Failure, "overriden method is not available for JSON-RPC";
+
+    my @async = $inst.^json-rpc-adhoc-methods("async");
+    is +@async, 4, "all :async methods found";
+    is-deeply @async.map(*.name).List, <emitter3 emitter2 emitter1 multi-emitter>, ":async method names";
 }
 
 subtest "Multi" => {

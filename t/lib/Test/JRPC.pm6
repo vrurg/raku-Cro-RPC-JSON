@@ -142,7 +142,8 @@ class ClientServer is export {
     has $.connection;
     has Bool:D $.websocket = True;
     has Bool:D $.json = True;
-    has Str:D $.url = "http://localhost:$!port/api";
+    has Str:D $.path = 'api';
+    has Str:D $.url = "http://localhost:$!port/$!path";
     has Any $!actor is built where *.defined;
     has $!application is built;
 
@@ -155,20 +156,22 @@ class ClientServer is export {
         $!server.start;
 
         without $!connection {
-            $!client //= ($!websocket
-                ?? Cro::WebSocket::Client
-                !! Cro::HTTP::Client
-            ).new: :$!json;
-            my $connection = $!client.connect: $!url;
-            await Promise.anyof($connection, Promise.in(5));
-            if $connection.status != Kept {
-                flunk 'Connection promise is not Kept';
-                if $connection.status == Broken {
-                    diag $connection.cause;
+            if $!websocket {
+                $!client = Cro::WebSocket::Client.new: :$!json;
+                my $connection = $!client.connect: $!url;
+                await Promise.anyof($connection, Promise.in(5));
+                if $connection.status != Kept {
+                    flunk 'Connection promise is not Kept';
+                    if $connection.status == Broken {
+                        diag $connection.cause;
+                    }
+                    bail-out;
+                } else {
+                    $!connection = $connection.result;
                 }
-                bail-out;
-            } else {
-                $!connection = $connection.result;
+            }
+            else {
+                $!client = Cro::HTTP::Client.new: base-uri => $!url, :$!json;
             }
         }
     }

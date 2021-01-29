@@ -272,124 +272,133 @@ subtest "Actor Class" => {
 }
 
 subtest "Async Notifications With Object" => {
-    plan 27;
+    plan 2;
+    use JRPC-WS-Actor;
 
-    my $model = ClientServer.new;
-    my $connection = $model.connection;
+    my class WS-Actor-Child is JRPC-WS-Actor { };
 
-    my $id = 0;
-    $connection.send({
-        jsonrpc => "2.0",
-        id => ++$id,
-        method => "rpc.on",
-        params => {event => <ns1 ns2 ns3>},
-    });
-    $connection.send({
-        jsonrpc => "2.0",
-        id => ++$id,
-        method => "foo",
-        params => {msg => "bar"}
-    });
+    for JRPC-WS-Actor, WS-Actor-Child -> \actor-class {
+        subtest "class " ~ actor-class.^name => {
+            plan 27;
+            my $model = ClientServer.new: actor => actor-class.new;
+            my $connection = $model.connection;
 
-    my $cnt = 0;
-    my $event-seq = 1;
-    my $closed;
-    react whenever $connection.messages -> $msg {
-        my %body = await $msg.body;
-        #note "<<< ", %body;
-        if %body<jsonrpc> {
-            if %body<id>:exists {
-                given %body<id> {
-                    when 1 | 4 {
-                        is-deep-compare %body,
-                                        %( jsonrpc => "2.0",
-                                           id => 1 | 4,
-                                           result => %( :ns1<ok>, :ns2<ok>, :ns3<ok> ),
-                                        ),
-                                        "method 'subscribe' response, id=" ~ $_;
-                    }
-                    when 3 | 5 {
-                        is-deep-compare %body,
-                                        %( jsonrpc => "2.0",
-                                           id => 3 | 5,
-                                           result => %( :ns1<ok>, :ns2<ok>, :ns3<ok> ),
-                                        ),
-                                        "method 'unsubscribe' response, id=" ~ $_;
-                        if $_ == 3 {
-                            Promise.in(3).then: {
-                                is $cnt, 3, "no notifications were received while unsubscribed";
-                                $event-seq = 1;
-                                # Every unsubscribe resets namespace counter by the agent object
-                                $connection.send({
-                                    jsonrpc => "2.0",
-                                    id => ++$id,
-                                    method => "rpc.on",
-                                    params => { event => <ns1 ns2 ns3> },
-                                });
+            my $id = 0;
+            $connection.send({
+                jsonrpc => "2.0",
+                id => ++$id,
+                method => "rpc.on",
+                params => { event => <ns1 ns2 ns3> },
+            });
+            $connection.send({
+                jsonrpc => "2.0",
+                id => ++$id,
+                method => "foo",
+                params => { msg => "bar" }
+            });
+
+            my $cnt = 0;
+            my $event-seq = 1;
+            my $closed;
+            react whenever $connection.messages -> $msg {
+                my %body = await $msg.body;
+                #note "<<< ", %body;
+                if %body<jsonrpc> {
+                    if %body<id>:exists {
+                        given %body<id> {
+                            when 1 | 4 {
+                                is-deep-compare %body,
+                                                %( jsonrpc => "2.0",
+                                                   id => 1 | 4,
+                                                   result => %( :ns1<ok>, :ns2<ok>, :ns3<ok>),
+                                                ),
+                                                "method 'subscribe' response, id=" ~ $_;
+                            }
+                            when 3 | 5 {
+                                is-deep-compare %body,
+                                                %( jsonrpc => "2.0",
+                                                   id => 3 | 5,
+                                                   result => %( :ns1<ok>, :ns2<ok>, :ns3<ok>),
+                                                ),
+                                                "method 'unsubscribe' response, id=" ~ $_;
+                                if $_ == 3 {
+                                    Promise.in(3).then: {
+                                        is $cnt, 3, "no notifications were received while unsubscribed";
+                                        $event-seq = 1;
+                                        # Every unsubscribe resets namespace counter by the agent object
+                                        $connection.send({
+                                            jsonrpc => "2.0",
+                                            id => ++$id,
+                                            method => "rpc.on",
+                                            params => { event => <ns1 ns2 ns3> },
+                                        });
+                                    }
+                                }
+                                if $_ == 5 {
+                                    # Last unsubscribe
+                                    is $cnt, 5, "the final count of received events";
+                                    whenever $closed = $connection.close(3141, timeout => 10) {
+                                        pass "connection closed";
+                                        done;
+                                    }
+                                }
+                            }
+                            when 2 {
+                                is-deep-compare %body,
+                                                %( jsonrpc => "2.0",
+                                                   id => 2,
+                                                   result => "+bar+",
+                                                ),
+                                                "method 'foo' response, id=" ~ $_;
+                            }
+                            default {
+                                flunk "Unexpected method call response: " ~ %body.gist;
                             }
                         }
-                        if $_ == 5 {
-                            # Last unsubscribe
-                            is $cnt, 5, "the final count of received events";
-                            whenever $closed = $connection.close(3141, timeout => 10) {
-                                pass "connection closed";
-                                done;
-                            }
+                    }
+                    else {
+                        flunk "Missing 'id' in a JSON-RPC response: " ~ %body.gist;
+                    }
+                }
+                else {
+                    is-deep-compare %body,
+                                    %(
+                                        namespace => /^ ns <[1..3]> $/,
+                                        params => $event-seq,
+                                    ),
+                                    "notification on namespace " ~ ( %body<namespace> // '*unknown*' ) ~ " " ~
+                                    $event-seq;
+                    if %body<namespace> eq 'ns3' {
+                        ++$event-seq;
+                        if ++$cnt == 3 {
+                            # Unsubscribe temporarily
+                            $connection.send({
+                                jsonrpc => "2.0",
+                                id => ++$id,
+                                method => "rpc.off",
+                                params => { event => <ns1 ns2 ns3> },
+                            });
+                        }
+                        if $cnt == 5 {
+                            $connection.send({
+                                jsonrpc => "2.0",
+                                id => ++$id,
+                                method => "rpc.off",
+                                params => { event => <ns1 ns2 ns3> },
+                            });
                         }
                     }
-                    when 2 {
-                        is-deep-compare %body,
-                                        %( jsonrpc => "2.0",
-                                           id => 2,
-                                           result => "+bar+",
-                                        ),
-                                        "method 'foo' response, id=" ~ $_;
-                    }
-                    default {
-                        flunk "Unexpected method call response: " ~ %body.gist;
-                    }
                 }
             }
-            else {
-                flunk "Missing 'id' in a JSON-RPC response: " ~ %body.gist;
-            }
-        }
-        else {
-            is-deep-compare %body,
-                            %(
-                                namespace => /^ ns <[1..3]> $/,
-                                params => $event-seq,
-                            ),
-                            "notification on namespace " ~ (%body<namespace> // '*unknown*') ~ " " ~ $event-seq;
-            if %body<namespace> eq 'ns3' {
-                ++$event-seq;
-                if ++$cnt == 3 {
-                    # Unsubscribe temporarily
-                    $connection.send({
-                        jsonrpc => "2.0",
-                        id => ++$id,
-                        method => "rpc.off",
-                        params => {event => <ns1 ns2 ns3>},
-                    });
-                }
-                if $cnt == 5 {
-                    $connection.send({
-                        jsonrpc => "2.0",
-                        id => ++$id,
-                        method => "rpc.off",
-                        params => {event => <ns1 ns2 ns3>},
-                    });
-                }
-            }
+            $model.server.stop;
+            my $actor = $model.actor;
+            await Promise.anyof($actor.closed, Promise.in(5));
+            is $actor.close-code, 3141, "connection close code (set by 'wsclose' hook)";
+            is $actor.async-close-code, 3141, "actor's async method reacted to WebSocket closing";
+            is $actor.exhausted.status, Kept, "actor's 'last' hook";
+            is $actor.closed.status, Kept, "actor's 'close' hook";
         }
     }
-    $model.server.stop;
-    my $actor = $model.actor;
-    await Promise.anyof($actor.closed, Promise.in(5));
-    is $actor.close-code, 3141, "connection close code (set by 'wsclose' hook)";
-    is $actor.async-close-code, 3141, "actor's async method reacted to WebSocket closing";
-    is $actor.exhausted.status, Kept, "actor's 'last' hook";
-    is $actor.closed.status, Kept, "actor's 'close' hook";
 }
 
 done-testing;

@@ -8,6 +8,8 @@ v0.1.2
 
   * Tighten bonds with [Cro's](https://cro.services) [`request`](https://cro.services/docs/reference/cro-http-request). Now `request` term exported by [`Cro::HTTP::Router`](https://cro.services/docs/reference/cro-http-router) will work where applicable.
 
+  * Implemented JSON-RPC method call authorization.
+
   * Switching to [`zef`](https://github.com/tony-o/raku-fez) ecosystem
 
 v0.1.1

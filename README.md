@@ -140,7 +140,7 @@ Here is an example of the most simplisic asynchronous code implementation. Note 
         }
     }
 
-**Note** that the same asynchronous code can be used for processing a HTTP request too. In this case `:web-socket` argument is not used, `get` turns into `post`, yet otherwise the code remains unchanged. But what remains the same is that `$in` would emit exactly one request object corresponding to the single HTTP `POST`. So, the only case when this approach makes sense if when same code object is re-used for both WebSocket and HTTP modes.
+**Note** that the same asynchronous code can be used for processing an HTTP request too. In this case `:web-socket` argument is not used, `get` turns into `post`, yet otherwise the sample doesn't change. But what remains the same is that `$in` would emit exactly one request object corresponding to the single HTTP `POST`. So, the only case when this approach makes sense if when the same code object is re-used for both WebSocket and HTTP modes.
 
 The above example can be extended to provide additional functionality when operating on a WebSocket:
 
@@ -306,8 +306,49 @@ The only exception from this rule are methods with a single parameter typed with
 
 *TODO*. Automatic marshalling/unmarshalling is considered for methods with a single parameter. But what'd be the best way to implement this functionality is yet to be decided.
 
-`is json-rpc` Trait
--------------------
+Authorizing Method Calls
+------------------------
+
+`Cro::RPC::JSON` provide means to implement session-based authorization of a method call. It is based on the following two key components:
+
+  * Session object, as [documented in a Cro paper](https://cro.services/docs/http-auth-and-sessions), available via `request.auth`. The object must consume [`Cro::RPC::JSON::Auth`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Auth.md) role and implement `json-rpc-authorize` method
+
+  * Authorization object provided with `:auth` modificator of either `json-rpc` or `json-rpc-actor` traits (see below)
+
+The Cro's session object used to authenticate/authorize a HTTP session or a WebSocket connection is expected to provide means of authorizing JSON-RPC method calls too. For this purpose it is expected to consume [`Cro::RPC::JSON::Auth`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Auth.md) role and implement `json-rpc-authorize` method. Generally speaking, the method is expected to either authorize or prohit an RPC method call based on the available session data. For example, here is an implementation of the session object from a test suite:
+
+    my class SessionMock does Cro::RPC::JSON::Auth does Cro::HTTP::Auth {
+        method json-rpc-authorize($meth-auth) {
+            return False if $meth-auth eq 'admin';
+            return True if $meth-auth eq 'user' | 'group';
+            die "Can't authorize with ", $meth-auth, ": no such privilege";
+        }
+    }
+
+This one is really simplistic. It prohibits any activity if it requires *admin* privileges; and only allows anything requiring *user* or *group*. Apparently, the real life requires something more sophisticated, depending on the authorization model of your application.
+
+It is worth mentioning that the auth object associated with a method can be virtually of any type given it's a definite. For example, it can be a [`Junction`](https://docs.raku.org/type/Junction):
+
+    method self-destroy() is json-rpc(:auth('root' | 'admin')) {...}
+
+Because defining the same auth object for every JSON-RPC method could be really boresome, it is possible to define the default one by associating it with actor class:
+
+    class Foo is json-rpc-actor(:auth<user>) {
+        ...
+    }
+
+In this case every JSON-RPC method is considered having *user* auth associated with them unless otherwise specified manually per method declaration.
+
+The authorization takes place whenever a definite auth object can be associated with a method. I.e. it could be an object defined for the method itself; or a default one can be found. Note also that there is no way to bypass authorization in the latter case.
+
+There are some specifics of the authorization process to be considered when class inheritance is involved:
+
+  * If a class inherits from one or more actor classes but is not formally declared as a JSON-RPC actor itself then the first defined auth object found on a parent actor class is used.
+
+  * The found default auth object overrides any other default specified for classes/roles located farther in MRO list. I.e. if classes `Foo` and `Bar` appear in MRO in the order of mentioning; and if `Foo` uses *manager* as the default auth, whereas `Bar` default is *admin*; then any JSON-RPC method from `Bar` with no explicit auth attached will be considered as having it set to *manager*.
+
+`is json-rpc` Method Trait
+--------------------------
 
 In its most simplistic form the trait simply marks a method and exports it for JSON-RPC calls under the same name it is declared in the actor class. But sometimes we need to export it under a different name than the one available for Raku code. In this case we can pass the desired name as trait's first positional argument:
 
@@ -394,8 +435,26 @@ The object mode of operations is handled by an asynchronous code similar to this
 
 A `:close` method is invoked when the supply block processing WebSocket requests is closed. Done by `CLOSE` phaser on `supply {...}` from the previous section.
 
+### `:auth(Any:D $auth-obj)`
+
+Defines an authorization object associated with method. See the section about method call authorization for more details.
+
+`is json-rpc-actor` Class/Role Trait
+------------------------------------
+
+It is not normally required to mark a class as a JSON-RPC actor explicitly because applying `json-rpc` trait to a method does it implicitly for us. In practice, this means that the class' `HOW` gets mixed in with `Cro::RPC::JSON::Metamodel::ClassHOW` role. But if we inherit from an actor class the child's `HOW` doesn't get the mixin. `Cro::RPC::JSON` can work with the child as well as with its parent, but sometime we may want the child to be formally declared an actor too. This is when `is json-rpc-actor` comes to help.
+
+### `:auth(Any:D $auth-obj)`
+
+`:auth` modificator defines actor's default authorization object. If a JSON-RPC method doesn't have one associated with it (see `:auth` of `json-rpc` trait) then the default one is used.
+
 NOTES
 =====
+
+Consuming A Role With JSON-RPC Methods
+--------------------------------------
+
+A role cannot be a JSON-RPC actor. But if a method in it has `json-rpc` trait applied the role becomes a JSON-RPC actor implementation. But a class consuming the role becomes an actor implicitly.
 
 Cro's `request` Object
 ----------------------

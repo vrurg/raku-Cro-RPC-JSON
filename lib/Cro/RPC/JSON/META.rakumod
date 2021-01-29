@@ -27,6 +27,7 @@ our sub META6 {
         ),
     provides => {
         'Cro::RPC::JSON'                                => 'lib/Cro/RPC/JSON.rakumod',
+        'Cro::RPC::JSON::Auth'                          => 'lib/Cro/RPC/JSON/Auth.rakumod',
         'Cro::RPC::JSON::BatchRequest'                  => 'lib/Cro/RPC/JSON/BatchRequest.rakumod',
         'Cro::RPC::JSON::BatchResponse'                 => 'lib/Cro/RPC/JSON/BatchResponse.rakumod',
         'Cro::RPC::JSON::Handler'                       => 'lib/Cro/RPC/JSON/Handler.rakumod',

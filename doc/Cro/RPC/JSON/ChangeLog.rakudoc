@@ -11,6 +11,7 @@
 =item Tighten bonds with L<Cro's|https://cro.services>
     L<C<request>|https://cro.services/docs/reference/cro-http-request>. Now C<request> term exported by
     L<C<Cro::HTTP::Router>|https://cro.services/docs/reference/cro-http-router> will work where applicable.
+=item Implemented JSON-RPC method call authorization.
 =item Switching to L<C<zef>|https://github.com/tony-o/raku-fez> ecosystem
 
 =head2 v0.1.1

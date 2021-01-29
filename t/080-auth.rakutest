@@ -1,0 +1,145 @@
+use v6.d;
+use lib $?FILE.IO.parent(1).add('lib');
+use Test;
+use Test::JRPC;
+use Cro::RPC::JSON;
+use Cro::RPC::JSON::Auth;
+use Cro::HTTP::Router;
+use Cro::HTTP::Session::InMemory;
+
+plan 2;
+
+subtest "Inheriting Auth" => {
+    plan 2;
+    my role Foo is json-rpc-actor(:auth<foo>) { }
+    my class Bar does Foo { }
+    my class Baz is Bar is json-rpc-actor { }
+    is Foo.^candidates[0].HOW.jrpc-auth, 'foo', "role's auth is set";
+    is Baz.^json-rpc-auth, 'foo', "'auth' is inherited";
+}
+
+subtest "Auth With Session" => {
+    plan 3;
+    my class JRPC-Auth-Actor is json-rpc-actor( :auth<user> ) {
+        method foo( ) is json-rpc {
+            "foo is using the default auth"
+        }
+        method fubar( ) is json-rpc( :auth<user> ) {
+            "explicit auth"
+        }
+        method bar( ) is json-rpc( :auth<group> ) {
+            "bar is allowed for a group"
+        }
+        method baz( ) is json-rpc( :auth<admin> ) {
+            "a method for an admin only"
+        }
+        method unused( ) is json-rpc( :auth( 'user' | 'group' ) ) {
+            "see if Junction is ok with auth"
+        }
+    }
+
+    my class SessionMock does Cro::RPC::JSON::Auth does Cro::HTTP::Auth {
+        method json-rpc-authorize( $meth-auth ) {
+            return False if $meth-auth eq 'admin';
+            return True if $meth-auth eq 'user' | 'group';
+            die "Can't authorize with ", $meth-auth, ": no such privilege";
+        }
+
+        method user {
+            "user"
+        }
+        method group {
+            "group"
+        }
+    }
+
+    my $application =
+        route {
+            before Cro::HTTP::Session::InMemory[SessionMock].new;
+            my $actor = JRPC-Auth-Actor.new;
+            post -> SessionMock $sess, 'api' {
+                json-rpc $actor;
+            }
+            get -> SessionMock $sess, 'api' {
+                json-rpc :ws, $actor;
+            }
+        };
+
+    my $id = 0;
+
+    my @tests =
+        %(
+            :method<foo>,
+            response => %(
+                id => { $_ == $id },
+                jsonrpc => "2.0",
+                result => "foo is using the default auth",
+            ),
+        ),
+        %(
+            :method<fubar>,
+            response => %(
+                id => { $_ == $id },
+                jsonrpc => "2.0",
+                result => "explicit auth",
+            ),
+        ),
+        %(
+            :method<bar>,
+            response => %(
+                id => { $_ == $id },
+                jsonrpc => "2.0",
+                result => "bar is allowed for a group",
+            ),
+        ),
+        %(
+            :method<baz>,
+            response => %(
+                id => { $_ == $id },
+                jsonrpc => "2.0",
+                error => %(
+                    :code( -32601 ),
+                    :data( %(:method( "baz" )) ),
+                    :message( "Unauthorized access to method 'baz'" )
+                ),
+            ),
+        ),
+        ;
+
+    for ( False, True ) -> $websocket {
+        subtest ( $websocket ?? "WebSockets" !! "HTTP/POST" ) => {
+            plan +@tests;
+            my $model = ClientServer.new: :$application, :$websocket, :path( $websocket ?? 'api' !! '' );
+            my $server = $model.server;
+            LEAVE $server.stop;
+            my $connection = $websocket ?? $model.connection !! $model.client;
+
+            for @tests -> %data {
+                my $resp-promise;
+                if $websocket {
+                    $connection.send:
+                        %(
+                            jsonrpc => "2.0",
+                            id => ++$id,
+                            method => %data<method>,
+                        );
+                    $resp-promise = $connection.messages.head.Promise;
+                }
+                else {
+                    $resp-promise = $connection.post('api',
+                                                     content-type => 'application/json',
+                                                     body => {
+                                                         jsonrpc => "2.0",
+                                                         id => ++$id,
+                                                         method => %data<method>,
+                                                     });
+                }
+                my $resp = await $resp-promise;
+                my %body = await $resp.body;
+                is-deep-compare %body, %data<response>, "authorization of " ~ %data<method>;
+            }
+        }
+    }
+
+    isa-ok JRPC-Auth-Actor.^lookup('unused').json-rpc-auth, Junction, "junctions can be used as auth object";
+}

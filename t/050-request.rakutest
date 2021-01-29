@@ -77,50 +77,60 @@ subtest "Basics", {
 }
 
 subtest "Actor Class" => {
-    plan @Test-Data::jrpc-requests.elems;
+    plan 2;
     use JRPC-Actor;
 
-    sub routes is export {
-        route {
-            my $actor = JRPC-Actor.new;
-            post -> "api" {
-                json-rpc $actor;
+    sub test-actor(Mu \actor, Str:D $message) {
+        subtest $message => {
+            plan @Test-Data::jrpc-requests.elems;
+            sub routes {
+                route {
+                    my $actor = actor.new;
+                    post -> "api" {
+                        json-rpc $actor;
+                    }
+                }
             }
+
+            my $id = 123;
+            test-service routes, {
+                test-given '/api', {
+                    my $*expected-jrpc-protocol = 'HTTP';
+                    my $*expected-jrpc-method = 'POST';
+                    for @Test-Data::jrpc-requests -> %req-data {
+                        my $id = next-id;
+                        my ( %json, %expect );
+                        given %req-data {
+                            %json = jsonrpc => "2.0",
+                                    :$id,
+                                    method => .<method>,
+                                    |( params => $_ with .<params> );
+                            %expect = status => .<status>,
+                                      json => {
+                                          deep-compare $_,
+                                                       {
+                                                           jsonrpc => "2.0",
+                                                           :$id,
+                                                           |( <result error>.map(-> $k { $k =>
+                                                                                         $_ with %req-data{$k} }) )
+                                                       }
+                                      },
+                                      ;
+                        }
+
+                        subtest %req-data<subtest>, {
+                            test post(:%json, content-type => "application/json; charset=UTF-8"), |%expect;
+                        }
+                    }
+                }
+            };
         }
     }
 
-    my $id = 123;
-    test-service routes, {
-        test-given '/api', {
-            my $*expected-jrpc-protocol = 'HTTP';
-            my $*expected-jrpc-method = 'POST';
-            for @Test-Data::jrpc-requests -> %req-data {
-                my $id = next-id;
-                my (%json, %expect);
-                given %req-data {
-                    %json = jsonrpc => "2.0",
-                            :$id,
-                            method => .<method>,
-                            |(params => $_ with .<params>)
-                        ;
-                    %expect = status => .<status>,
-                              json => {
-                                  deep-compare $_,
-                                               {
-                                                   jsonrpc => "2.0",
-                                                   :$id,
-                                                   |(<result error>.map(-> $k { $k => $_ with %req-data{$k} }))
-                                               }
-                              },
-                        ;
-                }
+    test-actor(JRPC-Actor, "An Actor Class");
 
-                subtest %req-data<subtest>, {
-                    test post(:%json, content-type => "application/json; charset=UTF-8"), |%expect;
-                }
-            }
-        }
-    };
+    my class Actor-Child is JRPC-Actor { };
+    test-actor(Actor-Child, "A Child Of Actor Class");
 }
 
 done-testing;

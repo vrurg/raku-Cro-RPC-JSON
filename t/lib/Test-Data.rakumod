@@ -47,7 +47,7 @@ our @jrpc-requests =
         status => 200,
         error   => {
             code    => JRPCMethodNotFound,
-            message => "JSON-RPC method non-json is not implemented by JRPC-Actor",
+            message => /^ "JSON-RPC method non-json is not implemented by " \S+ $/,
             data    => { method => "non-json" },
         },
     },
@@ -57,7 +57,7 @@ our @jrpc-requests =
         status => 200,
         error   => {
             code    => JRPCMethodNotFound,
-            message => "JSON-RPC method no-method is not implemented by JRPC-Actor",
+            message => /^ "JSON-RPC method no-method is not implemented by " \S+ $/,
             data    => { method => "no-method" },
         },
     },

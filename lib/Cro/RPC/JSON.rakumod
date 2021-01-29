@@ -4,6 +4,7 @@ unit module Cro::RPC::JSON:ver<0.1.2>:auth<cpan:VRURG>:api<2>;
 use Cro::HTTP::Router;
 use Cro::WebSocket::Message;
 use Cro::HTTP::Router::WebSocket;
+use Cro::RPC::JSON::Auth;
 use Cro::RPC::JSON::Utils;
 use Cro::RPC::JSON::Exception;
 use Cro::RPC::JSON::Notification;
@@ -199,10 +200,10 @@ parameter. This is how we tell C<Cro::RPC::JSON> about our intention to operate 
 
 
 
-B<Note> that the same asynchronous code can be used for processing a HTTP request too. In this case C<:web-socket>
-argument is not used, C<get> turns into C<post>, yet otherwise the code remains unchanged. But what remains the same is
+B<Note> that the same asynchronous code can be used for processing an HTTP request too. In this case C<:web-socket>
+argument is not used, C<get> turns into C<post>, yet otherwise the sample doesn't change. But what remains the same is
 that C<$in> would emit exactly one request object corresponding to the single HTTP C<POST>. So, the only case when this
-approach makes sense if when same code object is re-used for both WebSocket and HTTP modes.
+approach makes sense if when the same code object is re-used for both WebSocket and HTTP modes.
 
 The above example can be extended to provide additional functionality when operating on a WebSocket:
 
@@ -342,9 +343,9 @@ A string representing the current transport protocol. Only one of two values is 
 
 =head2 C<jrpc-async>
 
-A L<C<Bool>|https://docs.raku.org/type/Bool> which is I<True> if the code object passed to C<json-rpc> subroutine is detected as asynchronous. For
-object mode of operation it is always I<False> for JSON-RPC methods and always I<True> for C<:async> and C<:wsclose>
-methods (see C<json-rpc> trait section below).
+A L<C<Bool>|https://docs.raku.org/type/Bool> which is I<True> if the code object passed to C<json-rpc> subroutine is
+detected as asynchronous. For object mode of operation it is always I<False> for JSON-RPC methods and always I<True> for
+C<:async> and C<:wsclose> methods (see C<json-rpc> trait section below).
 
 B<Note> that both C<jrpc-protocol> and C<jrpc-async> are only available outside of C<supply> block of asynchronous
 code objects. Similarly, C<jrpc-request> and C<jrpc-response> are not available in asynchronous mode.
@@ -404,7 +405,64 @@ request object. In this case the method cannot be a C<multi> to prevent possible
 I<TODO>. Automatic marshalling/unmarshalling is considered for methods with a single parameter. But what'd be the best
 way to implement this functionality is yet to be decided.
 
-=head2 C<is json-rpc> Trait
+=head2 Authorizing Method Calls
+
+C<Cro::RPC::JSON> provide means to implement session-based authorization of a method call. It is based on the following
+two key components:
+
+=item Session object, as L<documented in a Cro paper|https://cro.services/docs/http-auth-and-sessions>, available via
+    C<request.auth>. The object must consume L<C<Cro::RPC::JSON::Auth>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Auth.md> role and implement C<json-rpc-authorize> method
+=item Authorization object provided with C<:auth> modificator of either C<json-rpc> or C<json-rpc-actor> traits (see below)
+
+The Cro's session object used to authenticate/authorize a HTTP session or a WebSocket connection is expected to provide
+means of authorizing JSON-RPC method calls too. For this purpose it is expected to consume
+L<C<Cro::RPC::JSON::Auth>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Auth.md>
+role and implement C<json-rpc-authorize> method. Generally speaking, the method is expected to either authorize or
+prohit an RPC method call based on the available session data. For example, here is an implementation of the session
+object from a test suite:
+
+    my class SessionMock does Cro::RPC::JSON::Auth does Cro::HTTP::Auth {
+        method json-rpc-authorize($meth-auth) {
+            return False if $meth-auth eq 'admin';
+            return True if $meth-auth eq 'user' | 'group';
+            die "Can't authorize with ", $meth-auth, ": no such privilege";
+        }
+    }
+
+
+This one is really simplistic. It prohibits any activity if it requires I<admin> privileges; and only allows anything
+requiring I<user> or I<group>. Apparently, the real life requires something more sophisticated, depending on the
+authorization model of your application.
+
+It is worth mentioning that the auth object associated with a method can be virtually of any type given it's a definite.
+For example, it can be a L<C<Junction>|https://docs.raku.org/type/Junction>:
+
+    method self-destroy() is json-rpc(:auth('root' | 'admin')) {...}
+
+Because defining the same auth object for every JSON-RPC method could be really boresome, it is possible to define the
+default one by associating it with actor class:
+
+    class Foo is json-rpc-actor(:auth<user>) {
+        ...
+    }
+
+In this case every JSON-RPC method is considered having I<user> auth associated with them unless otherwise specified
+manually per method declaration.
+
+The authorization takes place whenever a definite auth object can be associated with a method. I.e. it could be an
+object defined for the method itself; or a default one can be found. Note also that there is no way to bypass
+authorization in the latter case.
+
+There are some specifics of the authorization process to be considered when class inheritance is involved:
+
+=item If a class inherits from one or more actor classes but is not formally declared as a JSON-RPC actor itself then
+    the first defined auth object found on a parent actor class is used.
+=item The found default auth object overrides any other default specified for classes/roles located farther in MRO list.
+    I.e. if classes C<Foo> and C<Bar> appear in MRO in the order of mentioning; and if C<Foo> uses I<manager> as the
+    default auth, whereas C<Bar> default is I<admin>; then any JSON-RPC method from C<Bar> with no explicit auth
+    attached will be considered as having it set to I<manager>.
+
+=head2 C<is json-rpc> Method Trait
 
 In its most simplistic form the trait simply marks a method and exports it for JSON-RPC calls under the same name it is
 declared in the actor class. But sometimes we need to export it under a different name than the one available for Raku
@@ -502,7 +560,30 @@ The object mode of operations is handled by an asynchronous code similar to this
 A C<:close> method is invoked when the supply block processing WebSocket requests is closed. Done by C<CLOSE> phaser on
 C<supply {...}> from the previous section.
 
+=head3 C<:auth(Any:D $auth-obj)>
+
+Defines an authorization object associated with method. See the section about method call authorization for more
+details.
+
+=head2 C<is json-rpc-actor> Class/Role Trait
+
+It is not normally required to mark a class as a JSON-RPC actor explicitly because applying C<json-rpc> trait to a
+method does it implicitly for us. In practice, this means that the class' C<HOW> gets mixed in with
+C<Cro::RPC::JSON::Metamodel::ClassHOW> role. But if we inherit from an actor class the child's C<HOW> doesn't get the
+mixin. C<Cro::RPC::JSON> can work with the child as well as with its parent, but sometime we may want the child to be
+formally declared an actor too. This is when C<is json-rpc-actor> comes to help.
+
+=head3 C<:auth(Any:D $auth-obj)>
+
+C<:auth> modificator defines actor's default authorization object. If a JSON-RPC method doesn't have one associated with
+it (see C<:auth> of C<json-rpc> trait) then the default one is used.
+
 =head1 NOTES
+
+=head2 Consuming A Role With JSON-RPC Methods
+
+A role cannot be a JSON-RPC actor. But if a method in it has C<json-rpc> trait applied the role becomes a JSON-RPC actor
+implementation. But a class consuming the role becomes an actor implicitly.
 
 =head2 Cro's C<request> Object
 
@@ -588,13 +669,13 @@ multi sub json-rpc ( Any:D $obj, Bool :ws(:web-socket($websocket)) ) {
         supply {
 
             my sub call-phaser-methods( Str:D $mod, |c ) {
-                for $obj.^adhoc-methods($mod) -> &meth {
+                for json-rpc-adhoc-methods($obj, $mod) -> &meth {
                     $obj.&meth: |c
                 }
             }
 
             whenever $in -> $req {
-                my $method = $obj.^json-rpc-find-method($req.method);
+                my $method = json-rpc-find-method($obj, $req.method);
                 unless $method {
                     $req.respond:
                         exception => X::Cro::RPC::JSON::MethodNotFound.new(
@@ -602,6 +683,25 @@ multi sub json-rpc ( Any:D $obj, Bool :ws(:web-socket($websocket)) ) {
                             data => %( method => $req.method),
                             );
                     next
+                }
+
+                my $req-auth = $req.request.auth;
+                # If method doesn't have auth set then pick its class' default
+                my $meth-auth = $method.json-rpc-auth // json-rpc-auth($obj);
+                # Only authorize if there is auth object for either method or its class.
+                with $meth-auth {
+                    my $authorized = False;
+                    if $req-auth.defined && $req-auth ~~ Cro::RPC::JSON::Auth {
+                        $authorized = $req-auth.json-rpc-authorize($meth-auth);
+                    }
+                    unless $authorized {
+                        $req.respond:
+                            exception => X::Cro::RPC::JSON::MethodNotFound.new(
+                                msg => "Unauthorized access to method '" ~ $req.method ~ "'",
+                                data => %( method => $req.method ),
+                                );
+                        next
+                    }
                 }
 
                 my $signature = $method.signature;
@@ -658,7 +758,7 @@ multi sub json-rpc ( Any:D $obj, Bool :ws(:web-socket($websocket)) ) {
                 my $*CRO-JRPC-PROTOCOL = 'WebSocket';
                 my $*CRO-JRPC-ASYNC = True;
 
-                with $obj.^adhoc-methods("wsclose") -> @cmethods {
+                if +(my @cmethods = json-rpc-adhoc-methods($obj, 'wsclose')) {
                     whenever $close -> $req {
                         my $*CRO-JRPC-REQUEST = $req;
                         my $close-code = ( await $req.body ).read-uint16(0);
@@ -668,7 +768,7 @@ multi sub json-rpc ( Any:D $obj, Bool :ws(:web-socket($websocket)) ) {
                     }
                 }
 
-                for $obj.^async-methods -> &meth {
+                for json-rpc-adhoc-methods($obj, 'async') -> &meth {
                     my @pos;
                     if &meth.signature.count > 1 && $close.defined {
                         @pos.push: $close;
@@ -725,25 +825,33 @@ sub term:<jrpc-async>( ) is export {
     $*CRO-JRPC-ASYNC // Nil
 }
 
-sub jrpc-notify( Any:D $event ) is export {
+sub jrpc-notify(Any:D $event) is export {
     emit Cro::RPC::JSON::Notification.new(:json-body( $event ));
 }
 
 BEGIN {
-    multi trait_mod:<is>( Method:D \meth, Bool:D :$json-rpc! ) is export {
-        Cro::RPC::JSON::Utils::apply-trait( meth, :name( meth.name ) );
+    multi trait_mod:<is>(Method:D \meth, Bool:D :$json-rpc!) is export {
+        Cro::RPC::JSON::Utils::apply-json-rpc-trait(meth, :name( meth.name ));
     }
 
-    multi trait_mod:<is>( Method:D \meth, Str:D :$json-rpc! ) is export {
-        Cro::RPC::JSON::Utils::apply-trait( meth, :name( $json-rpc ) );
+    multi trait_mod:<is>(Method:D \meth, Str:D :$json-rpc!) is export {
+        Cro::RPC::JSON::Utils::apply-json-rpc-trait(meth, :name( $json-rpc ));
     }
 
-    multi trait_mod:<is>( Method:D \meth, Hash:D( List:D( Pair:D ) ) :$json-rpc! ) is export {
-        Cro::RPC::JSON::Utils::apply-trait( meth, $json-rpc<> );
+    multi trait_mod:<is>(Method:D \meth, :$json-rpc! ( Str:D $name, *%params )) is export {
+        Cro::RPC::JSON::Utils::apply-json-rpc-trait(meth, %params, :$name);
     }
 
-    multi trait_mod:<is>( Method:D \meth, :$json-rpc! ( Str:D $name, *%params ) ) is export {
-        Cro::RPC::JSON::Utils::apply-trait( meth, %params, :$name );
+    multi trait_mod:<is>(Method:D \meth, Hash:D( List:D( Pair:D ) ) :$json-rpc!) is export {
+        Cro::RPC::JSON::Utils::apply-json-rpc-trait(meth, $json-rpc<>);
+    }
+
+    multi trait_mod:<is>(Mu:U \typeobj, Hash:D( List:D( Pair:D ) ) :$json-rpc-actor!) is export {
+        Cro::RPC::JSON::Utils::apply-actor-trait(typeobj, $json-rpc-actor<>);
+    }
+
+    multi trait_mod:<is>(Mu:U \typeobj, Bool:D :$json-rpc-actor!) is export {
+        Cro::RPC::JSON::Utils::apply-actor-trait(typeobj) if $json-rpc-actor;
     }
 }
 

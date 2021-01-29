@@ -1,8 +1,10 @@
 use v6.d;
 unit module Cro::RPC::JSON::Utils:api<2>;
 
+use nqp;
 use Cro::RPC::JSON::Metamodel::ClassHOW;
 use Cro::RPC::JSON::Metamodel::ParametricRoleHOW;
+use Cro::RPC::JSON::Metamodel::MethodContainer;
 use Cro::RPC::JSON::Method;
 use Cro::RPC::JSON::Exception;
 
@@ -12,13 +14,37 @@ subset JRPCErrCode is export of Int:D where * ~~ (-32700 | (-32603..-32600) | (-
 
 constant JRPC-DEFAULT-VERSION is export = "2.0";
 
-constant JRPC-PARAMS = <async wsclose close last>;
+constant JRPC-ADHOC-PARAMS = any <async wsclose close last>;
+constant JRPC-HELPER-PARAMS = any <auth>;
+constant JRPC-ALL-PARAMS = any(JRPC-ADHOC-PARAMS, JRPC-HELPER-PARAMS);
 
 # ---------------------- TRAIT CODE --------------------------
 
-our sub apply-trait(Method:D \meth, %params?, Str :$name) {
+my sub HOW-onto-type( Mu:U \pkg) {
+    my $how := pkg.HOW;
+    # Both our ClassHOW and ParametricRoleHOW do MethodContainer role
+    unless $how ~~ Cro::RPC::JSON::Metamodel::MethodContainer {
+        given $how {
+            when Metamodel::ClassHOW {
+                $how does Cro::RPC::JSON::Metamodel::ClassHOW;
+            }
+            when Metamodel::ParametricRoleHOW {
+                $how does Cro::RPC::JSON::Metamodel::ParametricRoleHOW;
+            }
+            default {
+                X::Cro::RPC::JSON::InternalError.new(
+                    :msg( "Can't declare JSON-RPC methods in module "
+                          ~ pkg.^name
+                          ~ " of "
+                          ~ $how.^name )).throw
+            }
+        }
+    }
+}
+
+our sub apply-json-rpc-trait(Method:D \meth, %params?, Str :$name is copy) {
     my $pkg = $*PACKAGE;
-    my @unknown-params = %params.keys.grep: * !~~ any(JRPC-PARAMS);
+    my @unknown-params = %params.keys.grep: * !~~ JRPC-ALL-PARAMS;
     if +@unknown-params {
         my $suff = @unknown-params > 1 ?? "s" !! "";
         X::Cro::RPC::JSON::InternalError.new(
@@ -28,30 +54,48 @@ our sub apply-trait(Method:D \meth, %params?, Str :$name) {
                  ~ " in "
                  ~ $pkg.^name)).throw
     }
-    given $pkg.HOW {
-        when Metamodel::ClassHOW {
-            $pkg.HOW does Cro::RPC::JSON::Metamodel::ClassHOW unless $pkg.HOW ~~ Cro::RPC::JSON::Metamodel::ClassHOW;
-        }
-        when Metamodel::ParametricRoleHOW {
-            $pkg.HOW does Cro::RPC::JSON::Metamodel::ParametricRoleHOW
-                unless $pkg.HOW ~~ Cro::RPC::JSON::Metamodel::ParametricRoleHOW;
-        }
-        default {
-            X::Cro::RPC::JSON::InternalError.new(
-                :msg("Can't declare a JSON-RPC method in module "
-                     ~ $pkg.^name
-                     ~ " of "
-                     ~ $pkg.HOW.^name)).throw
-        }
-    }
+    HOW-onto-type($pkg);
     meth does Cro::RPC::JSON::Method unless meth ~~ Cro::RPC::JSON::Method;
+    meth.json-rpc-auth = $_ with %params<auth>;
+    my $is-adhoc = False;
+    for %params.keys.grep(JRPC-ADHOC-PARAMS) -> $mod {
+        once $is-adhoc = True;
+        # It's OK to be explicit and use `is json-rpc("foo", :!async)`.
+        $pkg.^json-rpc-add-adhoc($mod, meth) if ?%params{$mod};
+    }
+    $name //= meth.name unless $is-adhoc;
     with $name {
         meth.set-json-rpc-name($name);
         $pkg.^json-rpc-add-method( $name, meth );
     }
-    for %params.keys -> $mod {
-        # It's OK to be explicit and use `is json-rpc("foo", :!async)`.
-        $pkg.^json-rpc-add-adhoc($mod, meth) if ?%params{$mod};
+}
+
+our sub apply-actor-trait(Mu:U \typeobj, %params?) {
+    HOW-onto-type(typeobj);
+    typeobj.HOW.jrpc-auth = $_ with %params<auth>;
+}
+
+sub json-rpc-mro(Mu \type, Bool :$roles --> List()) {
+    type.^mro(:$roles).grep: { .HOW ~~ Cro::RPC::JSON::Metamodel::MethodContainer }
+}
+
+sub json-rpc-adhoc-methods(Mu \type, Str:D $mod --> List()) is export {
+    my $adhocs := nqp::list();
+    for json-rpc-mro(type, :roles) -> Mu \typeobj {
+        nqp::push($adhocs, $_) for typeobj.^json-rpc-adhoc-methods($mod, :local);
+    }
+    nqp::hllize($adhocs)
+}
+
+sub json-rpc-find-method(Mu \type, Str:D $method --> Code) is export {
+    for json-rpc-mro(type) -> Mu \typeobj {
+        return $_ with typeobj.^json-rpc-find-method($method, :local);
+    }
+}
+
+sub json-rpc-auth(Mu \type) is export {
+    for json-rpc-mro(type, :roles) -> Mu \typeobj {
+        return $_ with typeobj.^json-rpc-auth
     }
 }
 
