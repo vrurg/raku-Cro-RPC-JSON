@@ -115,14 +115,18 @@ subtest "Synchronous Code With Async Notifications" => {
         }
         else {
             ++$cnt;
-            is-deep-compare %body, %(
-                :notification<tick-tock>, params => %( :count($cnt) ),
-            ), "notification " ~ $cnt;
             if $cnt == 3 {
                 whenever $close = $connection.close(42, timeout => 10) {
                     pass "connection closed";
                     done;
                 }
+            }
+            # Stop counting after 3 notifications. Due to concurrency, the :async can emit more than 3 notifications
+            # before the connection gets closed. It's ok but must not break our expectations.
+            unless $cnt > 3 {
+                is-deep-compare %body, %(
+                    :notification<tick-tock>, params => %( :count( $cnt )),
+                ), "notification " ~ $cnt;
             }
         }
     }
