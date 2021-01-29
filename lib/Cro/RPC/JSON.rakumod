@@ -412,7 +412,7 @@ two key components:
 
 =item Session object, as L<documented in a Cro paper|https://cro.services/docs/http-auth-and-sessions>, available via
     C<request.auth>. The object must consume L<C<Cro::RPC::JSON::Auth>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Auth.md> role and implement C<json-rpc-authorize> method
-=item Authorization object provided with C<:auth> modificator of either C<json-rpc> or C<json-rpc-actor> traits (see below)
+=item Authorization object provided with C<:auth> modifier of either C<json-rpc> or C<json-rpc-actor> traits (see below)
 
 The Cro's session object used to authenticate/authorize a HTTP session or a WebSocket connection is expected to provide
 means of authorizing JSON-RPC method calls too. For this purpose it is expected to consume
@@ -472,15 +472,21 @@ code. In this case we can pass the desired name as trait's first positional argu
 
 Now we would have to replace I<"add"> string in the last JavaScript example with I<"sum">.
 
-The trait also accepts a number of named arguments which are going to be discussed next. They're called I<modificators>
-as they modify the way the methods are treated by C<Cro::RPC::JSON> core. It is important to remember that a method
-marked with a modificator is not available for JSON-RPC calls unless its name is explicitly provided. For example:
+The trait also accepts a number of named arguments which are going to be discussed next. They're called I<modifiers>
+as they modify the way the methods are treated by C<Cro::RPC::JSON> core. It is important to remember that some
+modifiers make a method unavailable for JSON-RPC calls:
 
     method helper() is json-rpc(:async) { ... }                 # Not available for JSON-RPC
-    method universal(...) is json-rpc("foo", :async) { ... }    # Available from JSON-RPC as method 'foo'
 
-Though it's pretty much bad idea to use a non-multi method with both name and a modificator because they might have
-conflicting set of arguments passed. A better approach would be to apply the trait to a C<proto>:
+Methods marked wit these modifiers become I<ad-hoc> methods; the modifiers are correspondingly called I<ad-hoc> too. One
+of the features making ad-hoc methods different from JSON-RPC exports is that they're not overridable in child classes.
+In other words, if class C<Foo> inherits from C<Bar> and both define a C<:async> ad-hoc named C<event-emitter> then
+both methods will be incorporated into JSON-RPC pipeline. This feature makes C<submethod>s ideal candidates for ad-hoc
+implementation.
+
+Though it's pretty much a bad idea, but if an ad-hoc method is given a name then it becomes a JSON-RPC export too. If
+for some reason a developer considers this approach then it is better be done by means of a multi-dispatch via applying
+the trait to method's C<proto>:
 
     proto method universal(|) is json-rpc("foo", :async) {...}
     multi method universal(Promise:D $close) { ... }  # Take care of :async
@@ -502,12 +508,10 @@ accessible one:
 
 So, it is now possible to use the single-argument version of C<add> method by a remote client too.
 
-Following are sections about the currently implemented trait modificators.
+=head3 Ad-Hoc Modifier C<:async>
 
-=head3 C<:async>
-
-C<:async> modificator must be used with methods providing asynchronous events for WebSocket transport. Rules similar to
-L<C<json-rpc>|#json-rpc> C<:async> named argument apply:
+C<:async> modifier must be used with methods providing asynchronous events for WebSocket transport. Rules similar
+to L<C<json-rpc>|#json-rpc> C<:async> named argument apply:
 
 =item the method must return a supply emitting either
  L<C<Cro::RPC::JSON::Notification>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.2/docs/md/Cro/RPC/JSON/Notification.md>
@@ -531,16 +535,16 @@ L<C<json-rpc>|#json-rpc> C<:async> named argument apply:
         }
     }
 
-=head3 C<:wsclose>
+=head3 Ad-Hoc Modifier C<:wsclose>
 
-This is another way to react to WebSocket close event. A method marked with this modificator will be called whenever
+This is another way to react to WebSocket close event. A method marked with this modifier will be called whenever
 WebSocket is closed by the client. The only argument passed to the method is the close code as given by the client:
 
     method websocket-closed(Int:D $code) is json-rpc(:wsclose) {
         self.cleanup($code);
     }
 
-=head3 C<:last>
+=head3 Ad-Hoc Modifier C<:last>
 
 C<:last> methods are invoked when the incoming L<C<Supply>|https://docs.raku.org/type/Supply> of WebSocket requests is closed.
 
@@ -555,15 +559,15 @@ The object mode of operations is handled by an asynchronous code similar to this
         }
     }
 
-=head3 C<:close>
+=head3 Ad-Hoc Modifier C<:close>
 
 A C<:close> method is invoked when the supply block processing WebSocket requests is closed. Done by C<CLOSE> phaser on
 C<supply {...}> from the previous section.
 
-=head3 C<:auth(Any:D $auth-obj)>
+=head3 Modifier C<:auth(Any:D $auth-obj)>
 
-Defines an authorization object associated with method. See the section about method call authorization for more
-details.
+Non ad-hoc modifier. Defines an authorization object associated with a JSON-RPC exported method. See the section about
+method call authorization for more details. 
 
 =head2 C<is json-rpc-actor> Class/Role Trait
 
@@ -575,7 +579,7 @@ formally declared an actor too. This is when C<is json-rpc-actor> comes to help.
 
 =head3 C<:auth(Any:D $auth-obj)>
 
-C<:auth> modificator defines actor's default authorization object. If a JSON-RPC method doesn't have one associated with
+C<:auth> modifier defines actor's default authorization object. If a JSON-RPC method doesn't have one associated with
 it (see C<:auth> of C<json-rpc> trait) then the default one is used.
 
 =head1 NOTES
