@@ -159,7 +159,7 @@ $(META): $(META_BUILDER) $(MAIN_MOD_FILE) $(META_MOD_FILE)
 
 upload: release
 	@echo "===> Uploading to CPAN"
-	@/bin/sh -c 'read -p "Do you really want to upload to CPAN? (y/N) " answer; [ $$answer = "Y" -o $$answer = "y" ]'
+	@/bin/sh -c 'read -p "Do you really want to upload the module? (y/N) " answer; [ $$answer = "Y" -o $$answer = "y" ]'
 	@fez upload
 
 clean:
