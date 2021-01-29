@@ -1,4 +1,5 @@
 .precomp/
 .idea/
 *.iml
+sdist/*
 Cro-RPC-JSON-v*

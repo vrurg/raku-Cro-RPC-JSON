@@ -25,6 +25,7 @@
     "Cro::RPC::JSON::BatchResponse": "lib/Cro/RPC/JSON/BatchResponse.rakumod",
     "Cro::RPC::JSON::Exception": "lib/Cro/RPC/JSON/Exception.rakumod",
     "Cro::RPC::JSON::Handler": "lib/Cro/RPC/JSON/Handler.rakumod",
+    "Cro::RPC::JSON::META": "lib/Cro/RPC/JSON/META.rakumod",
     "Cro::RPC::JSON::Message": "lib/Cro/RPC/JSON/Message.rakumod",
     "Cro::RPC::JSON::Metamodel::ClassHOW": "lib/Cro/RPC/JSON/Metamodel/ClassHOW.rakumod",
     "Cro::RPC::JSON::Metamodel::ConcreteRoleHOW": "lib/Cro/RPC/JSON/Metamodel/ConcreteRoleHOW.rakumod",

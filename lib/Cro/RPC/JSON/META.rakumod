@@ -36,6 +36,7 @@ our sub META6 {
         'Cro::RPC::JSON::Metamodel::ConcreteRoleHOW'    => 'lib/Cro/RPC/JSON/Metamodel/ConcreteRoleHOW.rakumod',
         'Cro::RPC::JSON::Metamodel::MethodContainer'    => 'lib/Cro/RPC/JSON/Metamodel/MethodContainer.rakumod',
         'Cro::RPC::JSON::Metamodel::ParametricRoleHOW'  => 'lib/Cro/RPC/JSON/Metamodel/ParametricRoleHOW.rakumod',
+        'Cro::RPC::JSON::META'                          => 'lib/Cro/RPC/JSON/META.rakumod',
         'Cro::RPC::JSON::Method'                        => 'lib/Cro/RPC/JSON/Method.rakumod',
         'Cro::RPC::JSON::MethodResponse'                => 'lib/Cro/RPC/JSON/MethodResponse.rakumod',
         'Cro::RPC::JSON::Notification'                  => 'lib/Cro/RPC/JSON/Notification.rakumod',
