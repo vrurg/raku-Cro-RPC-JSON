@@ -68,5 +68,5 @@
     "Test::When",
     "Cro::HTTP::Test"
   ],
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
