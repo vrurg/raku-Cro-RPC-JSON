@@ -42,6 +42,13 @@ our @jrpc-requests =
         ],
     },
     {
+        subtest => "undefined params",
+        method  => "paramless",
+        params  => Any,
+        status  => 200,
+        result  => "a method with no parameters",
+    },
+    {
         subtest => "try a non-JSON RPC method",
         method => "non-json",
         status => 200,
