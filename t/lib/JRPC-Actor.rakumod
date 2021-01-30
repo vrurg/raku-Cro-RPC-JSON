@@ -20,6 +20,10 @@ multi method bar ( Str :$a! ) { "single named Str param" }
 multi method bar ( Int $i, Num $n, Str $s ) { "Int, Num, Str positionals" }
 multi method bar ( *%options ) { [ "slurpy hash:", %options ] }
 
+method paramless is json-rpc {
+    "a method with no parameters"
+}
+
 method fail is json-rpc {
     my $ex = X::Cro::RPC::JSON::InvalidParams.new( msg => "I always fail" );
     $ex.throw;

@@ -720,7 +720,7 @@ multi sub json-rpc ( Any:D $obj, Bool :ws(:web-socket($websocket)) ) {
                         or $signature.params[1].type !~~ Cro::RPC::JSON::Request
                    )
                 {
-                    $params = $req.has-params ?? $req.params !! Empty;
+                    $params = $req.has-params && $req.params.defined ?? $req.params !! Empty;
                 }
                 else {
                     $params = [$req];
