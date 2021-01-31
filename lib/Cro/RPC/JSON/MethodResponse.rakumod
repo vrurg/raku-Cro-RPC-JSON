@@ -11,7 +11,7 @@ C<Cro::RPC::JSON::MethodResponse> – container for method response
 
 This class is a mediator between JSON-RPC actor code and the connected client. Normally it's only useful for
 asynchronous mode of operation (see L<C<Cro::JSON::RPC>|https://modules.raku.org/dist/Cro::JSON::RPC>). And even then it's better be created using
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON/Request.md>
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/Request.md>
 C<response> method.
 
 An instance of this class can be either in incomplete or completed state. The latter means that it has either
@@ -21,7 +21,7 @@ C<X::Cro::RPC::JSON::ServerError> is thrown then.
 =head2 Batches
 
 If C<Cro::RPC::JSON::MethodResponse> belongs to batch response it reports back to the batch object of
-L<C<Cro::RPC::JSON::BatchResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON/BatchResponse.md>
+L<C<Cro::RPC::JSON::BatchResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/BatchResponse.md>
 when gets completed.
 
 =head2 Class C<Error>
@@ -33,7 +33,7 @@ object information about errors.
 
 =item C<$.result> - contains the result of calling a JSON-RPC method. Could be any JSONifiable object
 =item C<$.error> – an instance of C<Cro::RPC::JSON::MethodResponse::Error>
-=item C<$.jrpc-request> - L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON.md> request object to which this response is generated
+=item C<$.jrpc-request> - L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON.md> request object to which this response is generated
 
 =head2 Class C<Error> Attributes
 
@@ -169,9 +169,9 @@ method Hash ( --> Hash ) {
 =head1 SEE ALSO
 
 L<C<Cro>|https://cro.services>,
-L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON.md>,
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON/Request.md>,
-L<C<Cro::RPC::JSON::BatchResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON/BatchResponse.md>
+L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON.md>,
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/Request.md>,
+L<C<Cro::RPC::JSON::BatchResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/BatchResponse.md>
 
 =head1 AUTHOR
 

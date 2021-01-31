@@ -9,7 +9,7 @@ C<Cro::RPC::JSON::ResponseSerializer> - base class for response serializers
 
 =head1 ROLES
 
-Does L<C<Cro::RPC::JSON::Requestish>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON/Requestish.md>
+Does L<C<Cro::RPC::JSON::Requestish>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/Requestish.md>
 
 =end pod
 
@@ -21,7 +21,7 @@ also does Cro::RPC::JSON::Requestish;
 
 =head1 SEE ALSO
 
-L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON.md>,
+L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON.md>,
 L<Cro|https://cro.services>
 
 =head1 AUTHOR

@@ -9,7 +9,7 @@ C<Cro::RPC::JSON::BodyStr> - role for converting a stringified requst body into 
 
 =head1 ROLES
 
-Does L<C<Cro::RPC::JSON::Requestish>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON/Requestish.md>
+Does L<C<Cro::RPC::JSON::Requestish>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/Requestish.md>
 
 =end pod
 
@@ -57,9 +57,9 @@ method body-to-request(Str:D $body --> Cro::RPC::JSON::Message:D) {
 
 =head1 SEE ALSO
 
-L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON.md>,
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON/Request.md>,
-L<C<Cro::RPC::JSON::BatchRequest>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.902/docs/md/Cro/RPC/JSON/BatchRequest.md>,
+L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON.md>,
+L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/Request.md>,
+L<C<Cro::RPC::JSON::BatchRequest>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/BatchRequest.md>,
 L<Cro|https://cro.services>
 
 =head1 AUTHOR
