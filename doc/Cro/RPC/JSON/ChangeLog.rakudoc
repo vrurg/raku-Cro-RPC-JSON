@@ -1,6 +1,10 @@
 =begin pod
 =head1 VERSIONS
 
+=head2 v0.1.4
+
+=item FIX: a bug preventing methods from returning TYPE<Nil> or non-TYPE<Any> typeobjects.
+
 =head2 v0.1.2
 
 =item Due to an overlooked naming conflict with Cro attributes and methods named C<request> and C<response> had to be
