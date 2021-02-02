@@ -56,4 +56,3 @@ method transformer ( Supply $in ) {
 }
 
 # Copyright (c) 2018-2021, Vadim Belman <vrurg@cpan.org>
-

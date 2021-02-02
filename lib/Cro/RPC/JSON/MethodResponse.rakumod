@@ -78,10 +78,16 @@ use Cro::RPC::JSON::Requestish;
 
 also does Cro::RPC::JSON::Message;
 
+our enum ResponseState <RCUnset RCResult RCError>;
+
 our class Error {
     has JRPCErrCode $.code is required;
     has Str $.message is required;
     has Hash $.data;
+
+    method COERCE(%p --> ::?CLASS:D) {
+        self.new: |%p
+    }
 
     method Hash ( --> Hash ) {
         %( :$!code, :$!message, |( $!data.defined ?? :$!data !! (  ) ) )
@@ -92,16 +98,26 @@ our class Error {
     }
 }
 
-has $.result;
-has Error $.error;
+has Mu $.result is default(Any) is built(False);
+has Error(Hash) $.error is built(False);
+has ResponseState:D $!state = RCUnset;
 has Cro::RPC::JSON::Message:D $.jrpc-request is required;
 
+submethod TWEAK(*%c) {
+    if %c<error>:exists {
+        self.set-error: %c<error>;
+    }
+    if %c<result>:exists {
+        self.set-result: %c<result>;
+    }
+}
+
 method filled {
-    $!result.defined || $!error.defined
+    $!state == RCUnset
 }
 
 method !set-yet {
-    if self.filled {
+    unless $!state == RCUnset {
         X::Cro::RPC::JSON::ServerError.new(
             :msg( "Alteration of a response result attempted for method '"
                   ~ $!jrpc-request.method
@@ -115,6 +131,7 @@ multi method set-error (*%err) {
     self!set-yet;
 #    note "!!! set error from: ", %err;
     $!error = Error.new(|%err);
+    $!state = RCError;
     with $!jrpc-request.batch { .complete($!jrpc-request) }
     $!error
 }
@@ -133,9 +150,17 @@ multi method set-error(Exception:D $exception) {
                    backtrace => ~$exception.backtrace, ));
 }
 
-method set-result(::?CLASS:D: $data --> Nil) {
+multi method set-error(Error:D $error) {
     self!set-yet;
-    $!result = $data;
+    $!state = RCError;
+    $!error = $error;
+}
+
+method set-result(::?CLASS:D: Mu \data --> Nil) {
+    self!set-yet;
+    # If data is undefined then $!result will remain set to Any which translates into JSON's null
+    $!result = $_ with data;
+    $!state = RCResult;
     # If part of a batch request then update its status
     with $!jrpc-request.batch { .complete($!jrpc-request) }
 }
@@ -146,10 +171,10 @@ method Hash ( --> Hash ) {
     %(
         :jsonrpc($req.jsonrpc // JRPC-DEFAULT-VERSION),
         |( $id.defined ?? :$id !! Empty ),
-        $!result.defined
+        $!state == RCResult
             ?? :$!result
             !! :error(
-                $!error.defined
+                $!state == RCError
                     ?? $!error.Hash
                     !! {
                             code => JRPCInternalError,

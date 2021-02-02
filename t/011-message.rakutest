@@ -5,9 +5,9 @@ use Cro::RPC::JSON::MethodResponse:api<2>;
 use Cro::RPC::JSON::Request:api<2>;
 use Cro::HTTP::Request;
 
-plan 2;
+plan 3;
 
-my @errParams = 
+my @errParams =
     %(
         :code(-32600),
         :message("неважлио зовсім"),
@@ -18,7 +18,7 @@ my @errParams =
         :message("неважлио зовсім"),
     );
 
-subtest "Error object" => { 
+subtest "Error object" => {
     plan 2;
 
     my $try = 1;
@@ -44,14 +44,30 @@ subtest "Response object" => {
                 :params{},
             );
 
-        my $payload = $k.key ~~ 'error' ??
-            :error( Cro::RPC::JSON::MethodResponse::Error.new( |$k.value ) )
-            !!
-            $k;
+        my $payload = $k.key ~~ 'error'
+            ?? :error( Cro::RPC::JSON::MethodResponse::Error.new( |$k.value ) )
+            !! $k;
 
         my $resp = $req.jrpc-response: |$payload;
         is-deeply $resp.Hash, %(:$id, |$k, :jsonrpc("2.0")), "convertion to hash {$id++}" ;
     };
+}
+
+subtest "Error handling" => {
+    plan 1;
+    my $req = Cro::RPC::JSON::Request.new:
+        request => Cro::HTTP::Request.new, # A mock is ok, it's not gonna be used.
+        data => %(
+            :id<42>,
+            :jsonrpc("2.0"),
+            :method<foo>,
+            :params{},
+        );
+    throws-like {
+            $req.jrpc-response: :result("the question"), :error( Cro::RPC::JSON::MethodResponse::Error.new( |@errParams[0] ));
+        },
+        X::Cro::RPC::JSON::ServerError,
+        "use of both `result` and `error` keys in JSON-RPC response is prohibited";
 }
 
 done-testing;
