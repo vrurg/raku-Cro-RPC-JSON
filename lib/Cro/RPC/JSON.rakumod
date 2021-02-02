@@ -567,7 +567,7 @@ C<supply {...}> from the previous section.
 =head3 Modifier C<:auth(Any:D $auth-obj)>
 
 Non ad-hoc modifier. Defines an authorization object associated with a JSON-RPC exported method. See the section about
-method call authorization for more details. 
+method call authorization for more details.
 
 =head2 C<is json-rpc-actor> Class/Role Trait
 
@@ -720,10 +720,10 @@ multi sub json-rpc ( Any:D $obj, Bool :ws(:web-socket($websocket)) ) {
                         or $signature.params[1].type !~~ Cro::RPC::JSON::Request
                    )
                 {
-                    $params = $req.has-params && $req.params.defined ?? $req.params !! Empty;
+                    $params := $req.has-params && $req.params.defined ?? $req.params !! Empty;
                 }
                 else {
-                    $params = [$req];
+                    $params := [$req];
                 }
 
                 do {

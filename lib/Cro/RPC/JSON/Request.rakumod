@@ -145,8 +145,8 @@ multi method respond(Exception:D :$exception! --> Nil) {
     self.respond;
 }
 
-multi method respond(Any:D $data --> Nil) {
-    self.jrpc-response.set-result: $data;
+multi method respond(Mu \data --> Nil) {
+    self.jrpc-response.set-result: data;
     self.respond;
 }
 
