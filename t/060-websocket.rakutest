@@ -340,7 +340,7 @@ subtest "Async Notifications With Object" => {
                                 }
                                 if $_ == 5 {
                                     # Last unsubscribe
-                                    is $cnt, 5, "the final count of received events";
+                                    cmp-ok $cnt, '>=', 5, "the final count of received events";
                                     whenever $closed = $connection.close(3141, timeout => 10) {
                                         pass "connection closed";
                                         done;
