@@ -18,7 +18,7 @@ subtest "Basics", {
 
     for @basics -> ($title, &r) {
         subtest $title => {
-            plan 4;
+            plan 5;
 
             test-service &r(), {
 
@@ -29,6 +29,11 @@ subtest "Basics", {
                 test post('api', json => { jsonrpc=>"2.0", id=>123, method => "oops", params => [1,2,3] }),
                      status => 200,
                      json => { jsonrpc => "2.0", id => 123, result => { a => 1, b => 2 } },
+                     ;
+
+                test post('api', json => { jsonrpc=>"2.0", id=> "stringy-id-124", method => "oops", params => [1,2,3] }),
+                     status => 200,
+                     json => { jsonrpc => "2.0", id => "stringy-id-124", result => { a => 1, b => 2 } },
                      ;
 
                 test post(
