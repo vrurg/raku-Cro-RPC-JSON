@@ -30,7 +30,6 @@ method body-to-request(Str:D $body --> Cro::RPC::JSON::Message:D) {
         CATCH { default { X::Cro::RPC::JSON::ParseError.new( :msg(.payload) ).throw } }
         $json = from-json( $body );
     }
-    #note "JSON PARSED: ", $json.perl;
     my $jrpc-request;
     given $json {
         my $request = self.request;

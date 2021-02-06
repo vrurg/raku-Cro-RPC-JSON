@@ -67,6 +67,7 @@ use Cro::RPC::JSON::Message:api<2>;
 use Cro::RPC::JSON::MethodResponse:api<2>;
 use Cro::RPC::JSON::Utils;
 use Cro::RPC::JSON::Requestish;
+use Cro::RPC::JSON::Unmarshal;
 
 also does Cro::RPC::JSON::Message;
 also does Cro::RPC::JSON::Requestish;

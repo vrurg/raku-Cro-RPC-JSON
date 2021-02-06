@@ -71,11 +71,7 @@ Declaring a class for serving a JSON-RPC requests is as simple as adding `is jso
         params: { a: "string" }
     }
 
-Which will result in invoking the first `bar` multi-candidate with named parameter `:a<string>`. But if we pass an array together with `params` key: `[42, 3.1415926, "anything"]` – then the second multi-candidate will be called with three positional arguments. This is the basic rule of translation used by `Cro::RPC::JSON`: a top-level JSON object is translated into named parameters; a top-level array represents positional parameters.
-
-At lower levels of the `params` data stucture `Cro::RPC::JSON` currentlty only supports passing simple values and basic data structures like objects/hashes and arrays, with accordance to [JSON](https://www.json.org) specification. Possible marshalling/unmarshalling of JSON is considered but not implemented yet.
-
-Whatever is returned by the method gets JSONified, wrapped into a valid JSON-RPC response object and returned to the client via the means of HTTP or WebSocket protocols. Any exceptions thrown and uncaught by user code are handled and valid JSON-RPC error response is returned to the client.
+Which will result in invoking the first `bar` multi-candidate with named parameter `:a<string>`. But if we pass an array together with `params` key: `[42, 3.1415926, "anything"]` – then the second multi-candidate will be called with three positional arguments. This is the basic rule of translation used by `Cro::RPC::JSON`: a top-level JSON object is translated into named parameters; a top-level array represents positional parameters. See more information about handling of method arguments and return values in the [Method Call Convention](#Method Call Convention) section below.
 
 More information about exporting methods for JSON-RPC is provided in `json-rpc` trait section below.
 
@@ -296,15 +292,104 @@ Apparently, all one needs is to use `is json-rpc` trait to mark a method as a JS
 Method Call Convention
 ----------------------
 
-Methods exported for JSON-RPC are invoked with parameters received from a JSON-RPC request, de-JSONified, and flattened. In other words it can be illustrated with:
+Methods exported for JSON-RPC are invoked with parameters received from a JSON-RPC request, de-serialized, and flattened. In other words it can be illustrated with:
 
     $actor.jrpc-method( |from-json($json-params) );
 
 Apparently, this turns any JSON array into positional parameters; and any JSON object into named parameters. Due to the limitations of JSON format, there is no way to pass both named and positionals at the same time.
 
-The only exception from this rule are methods with a single parameter typed with [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.3/docs/md/Cro/RPC/JSON/Request.md). This way the server code indicates that it wants to do in-depth analysis of the incoming requests and expects a raw request object. In this case the method cannot be a `multi` to prevent possible ambiguities.
+The only exception from this rule are methods with a single parameter typed with [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.3/docs/md/Cro/RPC/JSON/Request.md). This way a method indicates that it wants to do in-depth analysis of the incoming requests and expects a raw request object.
 
-*TODO*. Automatic marshalling/unmarshalling is considered for methods with a single parameter. But what'd be the best way to implement this functionality is yet to be decided.
+For developer conivenience the module provides automated serialization of method's return values and de-serialization of arguments. With this feature it's event more easy to write methods universal for both Raku and RPC side of things; and even less boilerplate for any kind of thunk methods.
+
+The most simple case is serialization of return values. It's done in a very straightforward way: a method return is passed to `JSON::Marshal::marshal` sub. The outcome is then sent back to the RPC client.
+
+Somewhat more complicate approach is used for method arguments recived via `params` key of JSON-RPC request. First of all, the module checks if `params` is an array. And if it is then it is considered as a list of positional arguments. This is an unbendable rule.
+
+If `params` is a JSON object and the callee method doesn't have a positional parameter then `params` is considered a set of named arguments. Otherwise it's considered to be the only positional argument of the method.
+
+Before submitting the arguments to the method `Cro::RPC::JSON` first tries to de-serialize them based on method's signature and parameter typing. The algorithm used is basically identical for both positionals and nameds: the module iterates over arguments, matches them to method parameters, and then `JSON::Unmarshal::unmarshal()` with parameter's type. For example:
+
+    class Product {
+        has Int $.SKU;
+        has Str $.name;
+    }
+    method to-inventory(Product:D $item, Int:D $count) is json-rpc { ... }
+
+When `to-inventory` is invoked via this JSON-RPC request:
+
+    {
+        id: 1,
+        jsonrpc: "2.0",
+        method: "to-inventory",
+        params: [
+            { SKU: 42, name: "Traveller's Towel" },
+            13
+        ]
+    }
+
+the first object in `params` array will be de-serialized into a `Product` instance. That's it, we now have method which can be transparently used by both Raky and RPC callers!
+
+If the method is changed to use named parameters:
+
+    method to-inventory(Product:D :$item, Int:D :$count) is json-rpc {...}
+
+Then `params` must be turned into a JSON object like this:
+
+    {
+        item: { SKU: 42, name: "Traveller's Towel" },
+        count: 13
+    }
+
+And the outcome will be no different of the positional variant.
+
+Aliasing of named parameters is supported. With this signature:
+
+    method to-inventory(Product:D :product(:$item), Int:D :$count) is json-rpc {...}
+
+We can use the following `params` JSON object:
+
+    {
+        product: { SKU: 42, name: "Traveller's Towel" },
+        count: 13
+    }
+
+`Any` type is special cased here. Parameters of `Any` type receive corresponding arguments from the request as-is, no unmarshaling attempted beyond de-stringification of a JSON entity:
+
+    method foo($x, $y) is json-rpc {...}
+
+    params: [true, { a: 1 }]
+
+`$x` here will be set to *True*, `$y` – to hash `{ a =` 1 }>.
+
+It is also possible to pass a single positional array argument with `params: [[1, 2, 3]]`.
+
+The unmarshalling will also work correctly for parameterized arrays and hashes. So, if we need to add several objects of the same kind we can do it like this:
+
+    method to-catalog(Product:D @items) is json-rpc {...}
+
+And it will work with:
+
+    params: [
+        { SKU: 42, name: "Traveller's Towel" },
+        { SKU: 13, name: "A Happy Amulet" },
+        { SKU: 256, name: "Product 100000000" }
+    ]
+
+`to-catalog` will receive an array of `Product` instances.
+
+Slurpy parameters are supported as well as captures. The module doesn't attempt unmarshalling of arguments to be consumed by slurpies or captures because there is no way for us to know their types.
+
+The situation is pretty much identical for multi-dispatch methods where to know the eventual candidate to be invoked we nede to know argument types; but we can't know them because we don't know the candidate! For this reason de-serialization is only done based on `proto` method signature:
+
+    proto method categorize-product(Product:D, |) is json-rpc {*}
+    multi method categorize-product(Product:D $item, Str:D $category-name) {...}
+    multi method categorize-product(Product:D $item, Int:D $category-id) {...}
+
+    params: [{ SKU: 42, name: "Traveller's Towel" }, "fictional"]
+    params: [{ SKU: 13, name: "A Happy Amulet" }, 12]
+
+Apparently, each of the `params` will dispatch as expected.
 
 Authorizing Method Calls
 ------------------------
@@ -436,7 +521,7 @@ A `:close` method is invoked when the supply block processing WebSocket requests
 
 ### Modifier `:auth(Any:D $auth-obj)`
 
-Non ad-hoc modifier. Defines an authorization object associated with a JSON-RPC exported method. See the section about method call authorization for more details. 
+Non ad-hoc modifier. Defines an authorization object associated with a JSON-RPC exported method. See the section about method call authorization for more details.
 
 `is json-rpc-actor` Class/Role Trait
 ------------------------------------

@@ -48,3 +48,49 @@ method non-json { "I won't be called!" }
 method protocol is json-rpc { jrpc-protocol }
 method is-async is json-rpc { jrpc-async }
 
+class IntraFoo {
+    has Str $.name;
+    has Int $.count;
+}
+
+class IntraBar {
+    has Bool $.flag;
+    has %.map;
+}
+
+method return-obj is json-rpc {
+    IntraFoo.new(:count(42), :name('The Answer'))
+}
+
+method accept-obj(IntraFoo:D $foo) is json-rpc {
+    $foo.raku
+}
+
+method accept-obj-array(IntraFoo:D @foo) is json-rpc {
+    @foo.raku
+}
+
+method accept-obj-hash(IntraFoo:D %foo) is json-rpc {
+    %foo.WHAT
+        .raku
+        ~ " = \{ "
+        ~ %foo.keys.sort
+            .map({ $_ ~ " => " ~ %foo{$_}.raku })
+            .join(", ")
+        ~ " \}"
+}
+
+method accept-obj-params(IntraFoo:D @foo, IntraBar:D $bar, *@pos) is json-rpc {
+    @foo.raku ~ "\n" ~ $bar.raku ~ "\n" ~ @pos.raku
+}
+
+proto method accept-obj-multi(IntraFoo:D, |) is json-rpc {*}
+multi method accept-obj-multi(IntraFoo:D, Str:D $str) {
+    "Str candidate " ~ $str
+}
+multi method accept-obj-multi(IntraFoo:D, Int:D $int) {
+    "Int candidate " ~ $int
+}
+multi method accept-obj-multi(IntraFoo:D, Bool:D $flag) {
+    "Bool candidate " ~ $flag
+}

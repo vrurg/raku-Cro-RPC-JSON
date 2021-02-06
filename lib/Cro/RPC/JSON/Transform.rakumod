@@ -5,6 +5,7 @@ use Cro::RPC::JSON::Exception;
 use Cro::RPC::JSON::Response;
 use Cro::Transform;
 use Cro::HTTP::Request;
+use JSON::Fast;
 
 also does Cro::Transform;
 
@@ -13,13 +14,14 @@ method !jsonify-exception(Exception:D $ex, Cro::HTTP::Request:D $request) {
     if $ex ~~ X::Cro::RPC::JSON {
         emit Cro::RPC::JSON::Response.new:
             :$request,
-            json-body => %(
-                jsonrpc => "2.0",
-                error => %(
-                    code => $ex.jrpc-code,
-                    message => $ex.msg,
-                )
-            );
+            json-body => to-json(%(
+                                     jsonrpc => "2.0",
+                                     error => %(
+                                         code => $ex.jrpc-code,
+                                         message => $ex.msg,
+                                     ),
+                                 ),
+                                 :!pretty);
     }
 }
 

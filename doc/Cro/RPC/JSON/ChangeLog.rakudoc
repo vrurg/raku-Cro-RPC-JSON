@@ -3,7 +3,8 @@
 
 =head2 v0.1.4
 
-=item FIX: a bug preventing methods from returning TYPE<Nil> or non-TYPE<Any> typeobjects.
+=item Implemented marshalling/unmarshalling of arguments and return values.
+=item FIX: a bug preventing methods from returning L<C<Nil>|https://docs.raku.org/type/Nil> or non-L<C<Any>|https://docs.raku.org/type/Any> typeobjects.
 
 =head2 v0.1.2
 

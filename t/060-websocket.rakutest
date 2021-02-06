@@ -22,7 +22,6 @@ subtest "Synchronous Code", {
         get -> 'api' {
             #        note "-> API";
             json-rpc :ws, -> $req {
-                #                diag "REQ: " ~ $req.data;
                 is-deep-compare $req.data, {
                     id => 111,
                     jsonrpc => "2.0",
@@ -310,6 +309,7 @@ subtest "Async Notifications With Object" => {
                 if %body<jsonrpc> {
                     if %body<id>:exists {
                         given %body<id> {
+                            done unless %body<result>:exists;
                             when 1 | 4 {
                                 is-deep-compare %body,
                                                 %( jsonrpc => "2.0",

@@ -49,6 +49,106 @@ our @jrpc-requests =
         result  => "a method with no parameters",
     },
     {
+        subtest => 'marshaling an object',
+        method  => 'return-obj',
+        params  => Any,
+        status  => 200,
+        result  => {
+            count => 42,
+            name => 'The Answer',
+        },
+    },
+    {
+        subtest => 'unmarshaling into an object',
+        method  => 'accept-obj',
+        params  => { :name('The Question'), :count(13) },
+        status  => 200,
+        result  => "JRPC-Actor::IntraFoo.new(name => \"The Question\", count => 13)",
+    },
+    {
+        subtest => 'unmarshaling into an array of objects',
+        method  => 'accept-obj-array',
+        params  => [[
+            { :name('question 1'), :count(13) },
+            { :name('question 2'), :count(42) },
+            { :name('question 3'), :count(0) },
+        ],],
+        status  => 200,
+        result  => "Array[JRPC-Actor::IntraFoo].new(JRPC-Actor::IntraFoo.new(name => \"question 1\", count => 13), JRPC-Actor::IntraFoo.new(name => \"question 2\", count => 42), JRPC-Actor::IntraFoo.new(name => \"question 3\", count => 0))",
+    },
+    {
+        subtest => 'unmarshaling into a hash of objects',
+        method  => 'accept-obj-hash',
+        params  => %(
+            q1 => { :name( 'question 1' ), :count( 13 ) },
+            q2 => { :name( 'question 2' ), :count( 42 ) },
+            q3 => { :name( 'question 3' ), :count( 0 ) },
+        ),
+        status  => 200,
+        result  => "Hash[JRPC-Actor::IntraFoo] = \{ q1 => JRPC-Actor::IntraFoo.new(name => \"question 1\", count => 13), q2 => JRPC-Actor::IntraFoo.new(name => \"question 2\", count => 42), q3 => JRPC-Actor::IntraFoo.new(name => \"question 3\", count => 0) }",
+    },
+    {
+        subtest => 'multi-param unmarshalling',
+        method  => 'accept-obj-params',
+        params  => [
+            [
+                { :name('question 1'), :count(13) },
+                { :name('question 2'), :count(42) },
+                { :name('question 3'), :count(0) },
+            ],
+            %(
+                flag => False,
+                map => %( :1st ),
+            ),
+            %(
+                flag => True,
+                map => %( :2nd ),
+            ),
+            "plain",
+            <A B C>,
+        ],
+        status  => 200,
+        result  => q:to/TEST-RETURN/.chomp
+Array[JRPC-Actor::IntraFoo].new(JRPC-Actor::IntraFoo.new(name => "question 1", count => 13), JRPC-Actor::IntraFoo.new(name => "question 2", count => 42), JRPC-Actor::IntraFoo.new(name => "question 3", count => 0))
+JRPC-Actor::IntraBar.new(flag => Bool::False, map => {:st(1)})
+[{:flag(Bool::True), :map(${:nd(2)})}, "plain", ["A", "B", "C"]]
+TEST-RETURN
+    },
+    {
+        subtest => 'unmarshaling with multi-dispatch method, Str candidate ',
+        method  => 'accept-obj-multi',
+        params  => [ { :name('The Question'), :count(13) }, "one" ],
+        status  => 200,
+        result  => "Str candidate one",
+    },
+    {
+        subtest => 'unmarshaling with multi-dispatch method, Int candidate ',
+        method  => 'accept-obj-multi',
+        params  => [ { :name('The Question'), :count(13) }, 42 ],
+        status  => 200,
+        result  => "Int candidate 42",
+    },
+    {
+        subtest => 'unmarshaling with multi-dispatch method, Bool candidate ',
+        method  => 'accept-obj-multi',
+        params  => [ { :name('The Question'), :count(13) }, False ],
+        status  => 200,
+        result  => "Bool candidate False",
+    },
+    {
+        subtest => 'unmarshaling with multi-dispatch method, no candidate ',
+        method  => 'accept-obj-multi',
+        params  => [ { :name('The Question'), :count(13) }, 42.13 ],
+        status  => 200,
+        error   => %(
+            code => -32601,
+            message => m:s/There is no matching variant for multi method "'accept-obj-multi'" on /,
+            data => %(
+                method => 'accept-obj-multi',
+            ),
+        ),
+    },
+    {
         subtest => "try a non-JSON RPC method",
         method => "non-json",
         status => 200,

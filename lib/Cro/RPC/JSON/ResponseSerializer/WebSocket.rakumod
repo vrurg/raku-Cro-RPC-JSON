@@ -10,7 +10,7 @@ use Cro::RPC::JSON::ResponseSerializer;
 use Cro::RPC::JSON::MethodResponse;
 use Cro::RPC::JSON::BatchResponse;
 use Cro::RPC::JSON::Notification;
-use JSON::Fast;
+use JSON::Marshal;
 
 also is Cro::RPC::JSON::ResponseSerializer;
 also does Cro::RPC::JSON::Transform;
@@ -29,9 +29,9 @@ method transformer ( Supply $in ) {
                 when Cro::RPC::JSON::BatchResponse {
                     my @rlist;
                     for .jrpc-responses -> $resp {
-                        @rlist.push( to-json($resp.Hash, :!pretty) ) unless $resp.jrpc-request.is-notification;
+                        @rlist.push( $resp.Hash ) unless $resp.jrpc-request.is-notification;
                     }
-                    $jresponse = @rlist;
+                    $jresponse = marshal(@rlist, :!pretty);
                 }
                 when Cro::RPC::JSON::Notification {
                     $jresponse = .json-body; # Notifications come in raw form, as emitted by user code
@@ -50,7 +50,7 @@ method transformer ( Supply $in ) {
             QUIT {
                 self!jsonify-exception($_, $.request);
             }
-            emit Cro::WebSocket::Message.new(to-json($jresponse, :!pretty));
+            emit Cro::WebSocket::Message.new(marshal($jresponse, :!pretty));
         }
     }
 }

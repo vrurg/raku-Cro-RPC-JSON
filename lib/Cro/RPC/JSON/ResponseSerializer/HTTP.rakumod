@@ -10,6 +10,7 @@ use Cro::RPC::JSON::Exception;
 use Cro::RPC::JSON::ResponseSerializer;
 use Cro::RPC::JSON::MethodResponse;
 use Cro::RPC::JSON::BatchResponse;
+use JSON::Marshal;
 
 also is Cro::RPC::JSON::ResponseSerializer;
 also does Cro::RPC::JSON::Transform;
@@ -23,14 +24,14 @@ method transformer ( Supply $in ) {
             my $jresponse = Cro::RPC::JSON::Response.new: :$.request;
             given $msg {
                 when Cro::RPC::JSON::MethodResponse {
-                    $jresponse.json-body = .jrpc-request.is-notification ?? "" !! .Hash;
+                    $jresponse.json-body = .jrpc-request.is-notification ?? "" !! marshal(.Hash, :!pretty);
                 }
                 when Cro::RPC::JSON::BatchResponse {
                     my @rlist;
                     for .jrpc-responses -> $resp {
                         @rlist.push( $resp.Hash ) unless $resp.jrpc-request.is-notification;
                     }
-                    $jresponse.json-body = @rlist;
+                    $jresponse.json-body = marshal(@rlist, :!pretty);
                 }
                 when Cro::HTTP::Message {
                     emit $msg;
