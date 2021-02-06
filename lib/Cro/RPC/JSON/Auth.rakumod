@@ -22,7 +22,7 @@ method json-rpc-authorize($ --> Bool) {...};
 
 =head1 SEE ALSO
 
-L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.3/docs/md/Cro/RPC/JSON.md>,
+L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.4/docs/md/Cro/RPC/JSON.md>,
 L<Cro documentation|https://cro.services/docs/http-auth-and-sessions>
 
 =head1 AUTHOR

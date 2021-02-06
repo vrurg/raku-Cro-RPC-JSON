@@ -10,7 +10,7 @@ C<Cro::RPC::JSON::RequestParser> - base class for request parsers
 
 =head1 ROLES
 
-Does L<C<Cro::RPC::JSON::RequestParser::BodyStr>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.3/docs/md/Cro/RPC/JSON/RequestParser/BodyStr.md>
+Does L<C<Cro::RPC::JSON::RequestParser::BodyStr>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.4/docs/md/Cro/RPC/JSON/RequestParser/BodyStr.md>
 
 =end pod
 
@@ -20,7 +20,7 @@ also does Cro::RPC::JSON::RequestParser::BodyStr;
 
 =head1 SEE ALSO
 
-L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.3/docs/md/Cro/RPC/JSON.md>,
+L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.4/docs/md/Cro/RPC/JSON.md>,
 L<Cro|https://cro.services>
 
 =head1 AUTHOR

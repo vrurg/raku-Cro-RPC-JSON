@@ -6,12 +6,12 @@ NAME
 ROLES
 =====
 
-Does [`Cro::RPC::JSON::RequestParser::BodyStr`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.3/docs/md/Cro/RPC/JSON/RequestParser/BodyStr.md)
+Does [`Cro::RPC::JSON::RequestParser::BodyStr`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.4/docs/md/Cro/RPC/JSON/RequestParser/BodyStr.md)
 
 SEE ALSO
 ========
 
-[`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.3/docs/md/Cro/RPC/JSON.md), [Cro](https://cro.services)
+[`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.4/docs/md/Cro/RPC/JSON.md), [Cro](https://cro.services)
 
 AUTHOR
 ======
