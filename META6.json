@@ -9,6 +9,7 @@
   "depends": [
     "Cro::HTTP",
     "JSON::Fast",
+    "JSON::Marshal",
     "Cro::HTTP::Router",
     "Cro::HTTP::Router::WebSocket"
   ],
@@ -45,6 +46,7 @@
     "Cro::RPC::JSON::ResponseSerializer::HTTP": "lib/Cro/RPC/JSON/ResponseSerializer/HTTP.rakumod",
     "Cro::RPC::JSON::ResponseSerializer::WebSocket": "lib/Cro/RPC/JSON/ResponseSerializer/WebSocket.rakumod",
     "Cro::RPC::JSON::Transform": "lib/Cro/RPC/JSON/Transform.rakumod",
+    "Cro::RPC::JSON::Unmarshal": "lib/Cro/RPC/JSON/Unmarshal.rakumod",
     "Cro::RPC::JSON::Utils": "lib/Cro/RPC/JSON/Utils.rakumod"
   },
   "raku": "6.d",

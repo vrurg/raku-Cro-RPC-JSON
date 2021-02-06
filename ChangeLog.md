@@ -1,6 +1,13 @@
 VERSIONS
 ========
 
+v0.1.4
+------
+
+  * Implemented marshalling/unmarshalling of arguments and return values.
+
+  * FIX: a bug preventing methods from returning [`Nil`](https://docs.raku.org/type/Nil) or non-[`Any`](https://docs.raku.org/type/Any) typeobjects.
+
 v0.1.2
 ------
 
