@@ -9,8 +9,8 @@ C<Cro::RPC::JSON::Request> - prepared JSON-RPC request object
 
 =head1 ROLES
 
-Does L<C<Cro::RPC::JSON::Message>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/Message.md>,
-L<C<Cro::RPC::JSON::Requestish>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/Requestish.md>
+Does L<C<Cro::RPC::JSON::Message>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.904/docs/md/Cro/RPC/JSON/Message.md>,
+L<C<Cro::RPC::JSON::Requestish>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.904/docs/md/Cro/RPC/JSON/Requestish.md>
 
 =head1 ATTRIBUTES
 
@@ -22,7 +22,7 @@ L<C<Cro::RPC::JSON::Requestish>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/
 =item C<Str $.invalid> – undefined for valid requests. Otherwise contains error message explaining the cause.
 =item C< $.batch> - if request is part of a L<batch request|https://www.jsonrpc.org/specification#batch>
     then this attribute points to corresponding
-    L<C<Cro::RPC::JSON::BatchRequest>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/BatchRequest.md> object
+    L<C<Cro::RPC::JSON::BatchRequest>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.904/docs/md/Cro/RPC/JSON/BatchRequest.md> object
 
 =head1 METHODS
 
@@ -39,7 +39,7 @@ is not specified.
 
 =head2 C<jrpc-response(|c)>
 
-Returns a L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/MethodResponse.md>
+Returns a L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.904/docs/md/Cro/RPC/JSON/MethodResponse.md>
 object paired with the current request. Most of the time this method must be given preference over creating a method
 response object manually.
 

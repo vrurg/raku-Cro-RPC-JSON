@@ -19,7 +19,7 @@ Returns all response objects.
 SEE ALSO
 ========
 
-[`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON.md), [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/Request.md), [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/MethodResponse.md), [`Cro::RPC::JSON::BatchRequest`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/BatchRequest.md),
+[`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.904/docs/md/Cro/RPC/JSON.md), [`Cro::RPC::JSON::Request`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.904/docs/md/Cro/RPC/JSON/Request.md), [`Cro::RPC::JSON::MethodResponse`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.904/docs/md/Cro/RPC/JSON/MethodResponse.md), [`Cro::RPC::JSON::BatchRequest`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.904/docs/md/Cro/RPC/JSON/BatchRequest.md),
 
 AUTHOR
 ======

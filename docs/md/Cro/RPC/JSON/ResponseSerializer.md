@@ -6,12 +6,12 @@ NAME
 ROLES
 =====
 
-Does [`Cro::RPC::JSON::Requestish`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON/Requestish.md)
+Does [`Cro::RPC::JSON::Requestish`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.904/docs/md/Cro/RPC/JSON/Requestish.md)
 
 SEE ALSO
 ========
 
-[`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.903/docs/md/Cro/RPC/JSON.md), [Cro](https://cro.services)
+[`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.904/docs/md/Cro/RPC/JSON.md), [Cro](https://cro.services)
 
 AUTHOR
 ======
