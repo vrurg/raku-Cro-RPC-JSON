@@ -14,7 +14,7 @@ This method is required to be implemented by consuming class. It must take the s
 SEE ALSO
 ========
 
-[`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.4/docs/md/Cro/RPC/JSON.md), [Cro documentation](https://cro.services/docs/http-auth-and-sessions)
+[`Cro::RPC::JSON`](https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.5/docs/md/Cro/RPC/JSON.md), [Cro documentation](https://cro.services/docs/http-auth-and-sessions)
 
 AUTHOR
 ======

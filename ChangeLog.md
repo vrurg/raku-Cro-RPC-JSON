@@ -1,6 +1,11 @@
 VERSIONS
 ========
 
+v0.1.5
+------
+
+  * FIX: availability of `json-rpc`, `jrpc-protocol`, `jrpc-async`, and Cro's `request` routines.
+
 v0.1.4
 ------
 
