@@ -38,8 +38,14 @@ subtest "Auth With Session" => {
         }
     }
 
+    my ($in-auth-jrpc-req, $in-auth-cro-req, $in-auth-protocol, $in-auth-async);
+
     my class SessionMock does Cro::RPC::JSON::Auth does Cro::HTTP::Auth {
         method json-rpc-authorize( $meth-auth ) {
+            $in-auth-jrpc-req = jrpc-request;
+            $in-auth-cro-req = request;
+            $in-auth-protocol = jrpc-protocol;
+            $in-auth-async = jrpc-async;
             return False if $meth-auth eq 'admin';
             return True if $meth-auth eq 'user' | 'group';
             die "Can't authorize with ", $meth-auth, ": no such privilege";
@@ -107,8 +113,9 @@ subtest "Auth With Session" => {
         ;
 
     for ( False, True ) -> $websocket {
-        subtest ( $websocket ?? "WebSockets" !! "HTTP/POST" ) => {
-            plan +@tests;
+        my $protocol = $websocket ?? "WebSocket" !! "HTTP";
+        subtest ( $protocol ) => {
+            plan +@tests + 6;
             my $model = ClientServer.new: :$application, :$websocket, :path( $websocket ?? 'api' !! '' );
             my $server = $model.server;
             LEAVE $server.stop;
@@ -138,6 +145,12 @@ subtest "Auth With Session" => {
                 my %body = await $resp.body;
                 is-deep-compare %body, %data<response>, "authorization of " ~ %data<method>;
             }
+            ok $in-auth-jrpc-req.defined, "JSON-RPC request object is available for authorization";
+            isa-ok $in-auth-jrpc-req, Cro::RPC::JSON::Request, "JSON-RPC request object type";
+            ok $in-auth-cro-req.defined, "Cro request object is available for authorization";
+            isa-ok $in-auth-cro-req, Cro::HTTP::Request, "Cro request object type";
+            nok $in-auth-async, "jrpc-async available for authorization code and set";
+            is $in-auth-protocol, $protocol, "protocol info is vailabe for authorization";
         }
     }
 

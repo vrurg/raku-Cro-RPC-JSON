@@ -779,6 +779,11 @@ multi sub json-rpc ( Any:D $obj, Bool :ws(:web-socket($websocket)) ) {
             }
 
             whenever $in -> $req {
+                my $*CRO-JRPC-REQUEST = $req;
+                my $*CRO-ROUTER-REQUEST = $req.request;
+                my $*CRO-JRPC-PROTOCOL = $websocket ?? 'WebSocket' !! 'HTTP';
+                my $*CRO-JRPC-ASYNC = False;
+                
                 my $method = json-rpc-find-method($obj, $req.method);
                 unless $method {
                     $req.respond:
@@ -915,9 +920,6 @@ multi sub json-rpc ( Any:D $obj, Bool :ws(:web-socket($websocket)) ) {
                     }
 
                     # Make Cro's `request` term work in actor methods
-                    my $*CRO-ROUTER-REQUEST = $req.request;
-                    my $*CRO-JRPC-PROTOCOL = $websocket ?? 'WebSocket' !! 'HTTP';
-                    my $*CRO-JRPC-ASYNC = False;
                     $req.respond: $obj.$method(|@arg-pos, |%arg-named);
                 }
                 LAST { call-phaser-methods 'last' }

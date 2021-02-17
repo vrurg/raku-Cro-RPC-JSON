@@ -94,3 +94,11 @@ multi method accept-obj-multi(IntraFoo:D, Int:D $int) {
 multi method accept-obj-multi(IntraFoo:D, Bool:D $flag) {
     "Bool candidate " ~ $flag
 }
+
+method get-jrpc-req is json-rpc {
+    ~ jrpc-request.WHICH
+}
+
+method get-cro-req is json-rpc {
+    ~ request.WHICH
+}

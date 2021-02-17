@@ -49,6 +49,20 @@ our @jrpc-requests =
         result  => "a method with no parameters",
     ),
     %(
+        subtest => "Cro request",
+        method  => "get-cro-req",
+        params  => Any,
+        status  => 200,
+        result  => rx/^ 'Cro::HTTP::Request|' \d+ /,
+    ),
+    %(
+        subtest => "Cro::RPC::JSON request",
+        method  => "get-jrpc-req",
+        params  => Any,
+        status  => 200,
+        result  => rx/^ 'Cro::RPC::JSON::Request|' \d+ /,
+    ),
+    %(
         subtest => 'marshaling an object',
         method  => 'return-obj',
         params  => Any,
