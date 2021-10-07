@@ -40,10 +40,10 @@ method jrpc-responses( ::?CLASS:D: --> Seq:D ) {
 
 =head1 SEE ALSO
 
-L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.5/docs/md/Cro/RPC/JSON.md>,
-L<C<Cro::RPC::JSON::Request>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.5/docs/md/Cro/RPC/JSON/Request.md>,
-L<C<Cro::RPC::JSON::MethodResponse>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.5/docs/md/Cro/RPC/JSON/MethodResponse.md>,
-L<C<Cro::RPC::JSON::BatchRequest>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.5/docs/md/Cro/RPC/JSON/BatchRequest.md>,
+L<C<Cro::RPC::JSON>|../JSON.md>,
+L<C<Cro::RPC::JSON::Request>|Request.md>,
+L<C<Cro::RPC::JSON::MethodResponse>|MethodResponse.md>,
+L<C<Cro::RPC::JSON::BatchRequest>|BatchRequest.md>,
 
 =head1 AUTHOR
 

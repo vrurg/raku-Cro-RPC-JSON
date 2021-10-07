@@ -20,7 +20,7 @@ has Cro::HTTP::Request:D $.request is required;
 
 =head1 SEE ALSO
 
-L<C<Cro::RPC::JSON>|https://github.com/vrurg/raku-Cro-RPC-JSON/blob/v0.1.5/docs/md/Cro/RPC/JSON.md>,
+L<C<Cro::RPC::JSON>|../JSON.md>,
 L<Cro|https://cro.services>
 
 =head1 AUTHOR

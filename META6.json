@@ -17,7 +17,6 @@
   "license": "Artistic-2.0",
   "meta-version": "0",
   "name": "Cro::RPC::JSON",
-  "perl": null,
   "production": true,
   "provides": {
     "Cro::RPC::JSON": "lib/Cro/RPC/JSON.rakumod",
