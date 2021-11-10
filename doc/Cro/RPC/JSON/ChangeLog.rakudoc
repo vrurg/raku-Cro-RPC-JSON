@@ -1,6 +1,10 @@
 =begin pod
 =head1 VERSIONS
 
+=head2 v0.1.6
+
+=item Minor fix to adapt the module to the latest change in C<.^mro(:roles)> semantics
+
 =head2 v0.1.5
 
 =item FIX: availability of C<json-rpc>, C<jrpc-protocol>, C<jrpc-async>, and Cro's C<request> routines.

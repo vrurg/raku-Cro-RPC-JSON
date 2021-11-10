@@ -1,5 +1,5 @@
 use v6.d;
-unit module Cro::RPC::JSON:ver<0.1.5>:auth<zef:vrurg>:api<2>;
+unit module Cro::RPC::JSON:ver<0.1.6>:auth<zef:vrurg>:api<2>;
 
 use Cro::HTTP::Router;
 use Cro::WebSocket::Message;
