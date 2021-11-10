@@ -31,6 +31,7 @@ our sub META6 {
         'Cro::RPC::JSON::Auth'                          => 'lib/Cro/RPC/JSON/Auth.rakumod',
         'Cro::RPC::JSON::BatchRequest'                  => 'lib/Cro/RPC/JSON/BatchRequest.rakumod',
         'Cro::RPC::JSON::BatchResponse'                 => 'lib/Cro/RPC/JSON/BatchResponse.rakumod',
+        'Cro::RPC::JSON::Constants'                     => 'lib/Cro/RPC/JSON/Constants.rakumod',
         'Cro::RPC::JSON::Exception'                     => 'lib/Cro/RPC/JSON/Exception.rakumod',
         'Cro::RPC::JSON::Handler'                       => 'lib/Cro/RPC/JSON/Handler.rakumod',
         'Cro::RPC::JSON::META'                          => 'lib/Cro/RPC/JSON/META.rakumod',

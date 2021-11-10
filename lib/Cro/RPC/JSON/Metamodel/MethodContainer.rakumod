@@ -3,6 +3,7 @@ unit role Cro::RPC::JSON::Metamodel::MethodContainer:api<2>;
 use nqp;
 use Cro::RPC::JSON::Exception;
 use Cro::RPC::JSON::Method;
+use Cro::RPC::JSON::Constants;
 
 has %!jrpc-methods;
 has $!adhoc-methods;
@@ -29,7 +30,10 @@ method incorporate_multi_candidates(Mu \typeobj) {
 
 method json-rpc-parent-actors(Mu \type --> List:D) {
     unless $!parent-jrpc-actors {
-        $!parent-jrpc-actors := type.^mro(:roles)[1..*].grep( { .HOW ~~ ::?ROLE } ).List;
+        $!parent-jrpc-actors := (USE_MRO_CONCRETIZATIONS
+            ?? type.^mro(:concretizations)
+            !! type.^mro(:roles)
+        )[1..*].grep( { .HOW ~~ ::?ROLE } ).List;
     }
     $!parent-jrpc-actors
 }

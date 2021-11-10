@@ -7,6 +7,7 @@ use Cro::RPC::JSON::Metamodel::ParametricRoleHOW;
 use Cro::RPC::JSON::Metamodel::MethodContainer;
 use Cro::RPC::JSON::Method;
 use Cro::RPC::JSON::Exception;
+use Cro::RPC::JSON::Constants;
 
 subset JRPCVersion is export of Str:D where "2.0";
 subset JRPCId is export of Any where Int:D | Str:D;
@@ -76,7 +77,10 @@ our sub apply-actor-trait(Mu:U \typeobj, %params?) {
 }
 
 sub json-rpc-mro(Mu \type, Bool :$roles --> List()) {
-    type.^mro(:$roles).grep: { .HOW ~~ Cro::RPC::JSON::Metamodel::MethodContainer }
+    (USE_MRO_CONCRETIZATIONS
+        ?? type.^mro(:concretizations)
+        !! type.^mro(:$roles)
+    ).grep: { .HOW ~~ Cro::RPC::JSON::Metamodel::MethodContainer }
 }
 
 sub json-rpc-adhoc-methods(Mu \type, Str:D $mod --> List()) is export {
