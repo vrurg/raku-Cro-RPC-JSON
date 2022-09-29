@@ -1,5 +1,5 @@
 use v6.d;
-unit module Cro::RPC::JSON:ver<0.1.6>:auth<zef:vrurg>:api<2>;
+unit module Cro::RPC::JSON:ver($?DISTRIBUTION.meta<ver>):auth($?DISTRIBUTION.meta<auth>):api($?DISTRIBUTION.meta<api>);
 
 use Cro::HTTP::Router;
 use Cro::WebSocket::Message;
@@ -118,10 +118,10 @@ most simple case of a synchronous code object. Any call to JSON-RPC to any metho
 The difference between these two modes is in the nature of the protocols: where HTTP supports single request/response,
 WebSocket supports continuous flow of requests/responses and bidirectional communication between client and server.
 Because handling of an HTTP request is rather easy to understand we're not going to focus much on it. Instead, let's
-focus in WebSocket specifics of implemeting JSON-RPC by C<Cro::RPC::JSON>.
+focus on WebSocket specifics of implementing JSON-RPC by C<Cro::RPC::JSON>.
 
 First of all, it has to be mentioned that there is no single specification of how JSON-RPC over WebSocket is to be
-implemented. C<Cro::RPC::JSON> targetting at supporting L<rpc-websockets|https://github.com/elpheria/rpc-websockets>
+implemented. C<Cro::RPC::JSON> targeting at supporting L<rpc-websockets|https://github.com/elpheria/rpc-websockets>
 implementation for JavaScript.
 
 To handle JSON-RPC request/response protocol a WebSocket stream is considered a bidirectional sequence of JSON objects
@@ -1023,6 +1023,10 @@ BEGIN {
     multi trait_mod:<is>(Mu:U \typeobj, Bool:D :$json-rpc-actor!) is export {
         Cro::RPC::JSON::Utils::apply-actor-trait(typeobj) if $json-rpc-actor;
     }
+}
+
+our sub META6 {
+    $?DISTRIBUTION.meta
 }
 
 =begin pod
