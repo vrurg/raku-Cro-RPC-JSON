@@ -33,3 +33,4 @@ jobs:
     with:
       os: ${{ matrix.os }}
       rakudo-version: ${{ matrix.rakudo-version }}
+      with-openssl: true
